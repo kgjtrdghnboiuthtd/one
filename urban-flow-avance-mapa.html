@@ -177,9 +177,7 @@
     }
     @media(max-width:620px){#map{height:520px}}
 
-    .controls{
-      display:grid;gap:10px;
-    }
+    .controls{display:grid;gap:10px}
     .control{
       border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.03);
@@ -220,7 +218,7 @@
       background:rgba(255,255,255,.04);
       color:var(--text);
       text-decoration:none;
-      font-weight:750;
+      font-weight:800;
       font-size:12.5px;
       transition:.18s ease;
     }
@@ -229,6 +227,9 @@
       border-color:transparent;
       background: linear-gradient(135deg, rgba(103,232,249,.95), rgba(167,139,250,.95));
       color:#071022;
+    }
+    .btn.ghost{
+      background:rgba(255,255,255,.03);
     }
 
     .section-title{
@@ -258,8 +259,78 @@
     }
     .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
     .notice{color:var(--muted);font-size:12.2px;line-height:1.55;margin:0}
-    .em{color:rgba(255,255,255,.86);font-weight:700}
+    .em{color:rgba(255,255,255,.86);font-weight:800}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+
+    /* Timeline */
+    .timeline{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:16px;
+      padding:12px;
+      margin-top:12px;
+    }
+    .t-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .t-top .left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .t-top .stamp{color:var(--muted);font-size:12.2px}
+    .slider{
+      width:100%;
+      margin-top:10px;
+      accent-color: var(--accent);
+    }
+
+    /* Big benefit cards */
+    .benefit-grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+    .benefit{
+      grid-column:span 6;
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius: 20px;
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    @media(max-width:1020px){.benefit{grid-column:span 12}}
+    .benefit:before{
+      content:"";
+      position:absolute;inset:-1px;
+      background:
+        radial-gradient(700px 220px at 15% 0%, rgba(103,232,249,.14), transparent 55%),
+        radial-gradient(700px 220px at 85% 0%, rgba(167,139,250,.12), transparent 55%);
+      opacity:.9;
+      pointer-events:none;
+    }
+    .benefit > *{position:relative}
+    .b-head{display:flex;gap:12px;align-items:flex-start}
+    .icon{
+      width:42px;height:42px;border-radius:16px;
+      background: rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.14);
+      display:flex;align-items:center;justify-content:center;
+      flex:0 0 auto;
+      box-shadow: 0 18px 40px rgba(0,0,0,.25);
+    }
+    .b-title{margin:0;font-size:14px;letter-spacing:-.2px}
+    .b-sub{margin:6px 0 0;color:var(--muted);font-size:12.6px;line-height:1.55}
+    .b-metrics{
+      margin-top:12px;
+      display:flex;gap:10px;flex-wrap:wrap;
+    }
+    .metric{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      border-radius:14px;
+      padding:10px 12px;
+      min-width: 160px;
+    }
+    .metric .n{font-size:16px;font-weight:900;letter-spacing:-.2px}
+    .metric .l{margin-top:4px;color:var(--muted);font-size:12.2px}
+    .hint{margin-top:10px;color:var(--muted);font-size:12.2px}
   </style>
 </head>
 
@@ -289,25 +360,25 @@
         </div>
         <div class="title">Estado de avance (visión ejecutiva)</div>
         <p class="sub">
-          Este tablero muestra el progreso del proyecto, el mapa operativo (OSM) y la compatibilidad prevista con
-          <span class="em">Google Maps</span> y <span class="em">Waze for Cities</span> (si hay autorización).
+          Tablero con mapa operativo (OSM) + capas de congestión “snap to road” (OSRM) y una <span class="em">timeline</span>
+          para visualizar el histórico (base para entrenar/calibrar modelos).
         </p>
 
         <div class="grid">
           <div class="card">
             <span class="pill"><span class="dot ok"></span> Módulo 1: Datos</span>
             <h3 style="margin-top:10px">Ingesta & normalización</h3>
-            <p>Base técnica lista: capas OSM + modelo de datos para incidentes, cierres y velocidad agregada.</p>
+            <p>Modelo de datos listo para incidentes, cierres y velocidad agregada (por proveedor autorizado).</p>
           </div>
           <div class="card">
             <span class="pill"><span class="dot warn"></span> Módulo 2: Simulación</span>
             <h3 style="margin-top:10px">Gemelo digital (piloto)</h3>
-            <p>Pendiente de definir distrito/corredor y fuentes de eventos oficiales para calibrar escenarios.</p>
+            <p>Requiere definir distrito/corredor y fuentes oficiales para calibrar escenarios (baseline → simulación).</p>
           </div>
           <div class="card">
             <span class="pill"><span class="dot warn"></span> Módulo 3: Piloto</span>
             <h3 style="margin-top:10px">Emergencias (onda verde)</h3>
-            <p>Diseño “supervisado + fail-safe”. Requiere validación operativa y marco de seguridad.</p>
+            <p>Diseño “supervisado + fail-safe”. Necesita validación operativa y marco de seguridad.</p>
           </div>
         </div>
 
@@ -318,19 +389,26 @@
             <h3>Fuentes de datos (previstas)</h3>
             <p>
               • OpenStreetMap (base cartográfica) ·
-              • Incidentes / cierres (feeds institucionales) ·
+              • Feeds institucionales (cierres/obras/eventos) ·
               • Velocidades agregadas (si se habilita proveedor) ·
-              • Integración Waze for Cities (si hay acuerdo).
+              • Waze for Cities (si hay autorización).
             </p>
           </div>
           <div class="card" style="grid-column:span 6">
-            <h3>Notas de gobernanza</h3>
+            <h3>Gobernanza / seguridad</h3>
             <p>
-              Recomendación inicial: “asistencia a decisión” + simulación antes de cualquier intervención real.
-              Logs, auditoría, y reversión a plan estándar como requisito mínimo.
+              Enfoque recomendado: asistencia a decisión + simulación antes de intervenir semáforos.
+              Logs, auditoría y reversión a plan estándar como requisito.
             </p>
           </div>
         </div>
+
+        <div class="sep"></div>
+
+        <p class="notice">
+          <span class="em">Nota técnica:</span> la capa “congestión” se genera como geometría de ruta real (snap-to-road) usando OSRM.
+          Si OSRM no está disponible, cae en modo fallback (líneas simples).
+        </p>
       </div>
 
       <div class="rightcol">
@@ -338,8 +416,8 @@
           <h3>Acciones rápidas</h3>
           <p class="small">
             • <span class="kbd">Imprimir</span> como PDF para comité<br/>
-            • Encender/apagar capas del mapa<br/>
-            • Mostrar sección “Ciudades + resultados”
+            • Timeline para “replay” del tráfico<br/>
+            • Mostrar “Ciudades + resultados” (cards grandes)
           </p>
           <div class="sep"></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -351,7 +429,8 @@
         <div class="mini" id="waze">
           <h3>Modo Waze (previsto)</h3>
           <p class="notice">
-            Waze for Cities permite a entidades públicas monitorear tráfico e incidentes y compartir cierres/obras con Waze y Google Maps. (Activación sujeta a autorización/partenariado).
+            Waze for Cities permite a entidades públicas monitorear incidentes y compartir cierres/obras con Waze/Google Maps.
+            Activación sujeta a autorización/partenariado.
           </p>
           <div class="sep"></div>
           <p class="small mono">Estado: <b>EN ESPERA</b> (solicitud institucional)</p>
@@ -360,10 +439,10 @@
         <div class="mini">
           <h3>Compatibilidad Google Maps</h3>
           <p class="small">
-            Esta página soporta el cambio de “base map” a Google Maps si se configura la clave.
+            La UI está preparada para alternar base map. Por seguridad, no se incluye API key aquí.
           </p>
           <div class="sep"></div>
-          <p class="small mono">API Key: <b>no incluida</b> (por seguridad)</p>
+          <p class="small mono">API Key: <b>no incluida</b></p>
         </div>
       </div>
     </div>
@@ -373,13 +452,31 @@
       <div class="panel">
         <div class="section-title">
           <h2>Mapa operativo (Lima)</h2>
-          <span>OSM listo · Google / Waze previsto</span>
+          <span>OSM listo · rutas “snap” a calles · timeline</span>
         </div>
+
         <div id="map" aria-label="Mapa de tráfico y eventos"></div>
+
+        <!-- Timeline -->
+        <div class="timeline" aria-label="Timeline de congestión">
+          <div class="t-top">
+            <div class="left">
+              <button id="btnPlay" class="btn primary" type="button">▶ Reproducir</button>
+              <button id="btnStepBack" class="btn ghost" type="button">⟵</button>
+              <button id="btnStepFwd" class="btn ghost" type="button">⟶</button>
+              <span class="pill"><span class="dot ok"></span> Histórico (demo)</span>
+            </div>
+            <div class="stamp">Tiempo: <span id="tLabel" class="mono">—</span></div>
+          </div>
+          <input id="tSlider" class="slider" type="range" min="0" max="9" step="1" value="0" />
+          <p class="notice" style="margin-top:10px">
+            Este “replay” sirve como prueba visual de un histórico: es lo que luego alimenta la calibración del modelo (baseline) y la simulación.
+          </p>
+        </div>
+
         <div class="sep"></div>
         <p class="notice">
-          Demo interna: los “niveles de congestión” y “eventos” son capas de ejemplo (mock) para mostrar el funcionamiento.
-          Se reemplazan por datos reales al conectar fuentes institucionales o proveedores autorizados.
+          Demo interna: congestión/incident layers son mock. Se sustituyen por datos reales cuando se conecten fuentes institucionales o proveedores autorizados.
         </p>
       </div>
 
@@ -388,7 +485,7 @@
           <h4>Capas (demo)</h4>
 
           <div class="row">
-            <label><input id="tgTraffic" class="toggle" type="checkbox" checked /> Congestión (mock)</label>
+            <label><input id="tgTraffic" class="toggle" type="checkbox" checked /> Congestión (snap-to-road)</label>
           </div>
 
           <div class="row">
@@ -433,83 +530,157 @@
             Ajusta estos presets según el distrito piloto definido con el Ministerio.
           </p>
         </div>
+
+        <div class="control">
+          <h4>Estado de “snap-to-road”</h4>
+          <p id="snapStatus" class="notice">Inicializando…</p>
+        </div>
       </div>
     </div>
 
-    <!-- Ciudades + resultados -->
+    <!-- Ciudades + resultados (bigger focus) -->
     <section id="ciudades">
       <div class="panel">
         <div class="section-title">
-          <h2>Ciudades / países que ya lo hacen + resultados (referencias)</h2>
-          <span>Para contexto institucional</span>
+          <h2>Ciudades que ya lo hacen + resultados (referencias)</h2>
+          <span>Bloques reforzados + iconos</span>
         </div>
 
-        <ul class="list">
-          <li class="li">
-            <span class="dot ok" style="margin-top:6px"></span>
-            <div>
-              <b>Londres (TfL) — Waze for Cities</b>
-              TfL indica que es miembro de “Waze for Cities”, con acceso a información de tráfico/tiempos de viaje. (Referencia pública institucional).
+        <div class="benefit-grid">
+          <div class="benefit">
+            <div class="b-head">
+              <div class="icon" aria-hidden="true">
+                <!-- city icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M4 21V9l8-4 8 4v12" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/>
+                  <path d="M9 21V12h6v9" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="b-title">Londres (TfL) — colaboración de datos (Waze for Cities)</h3>
+                <p class="b-sub">
+                  Referencia institucional pública: participación en programa de intercambio de información de tráfico/incidentes para mejorar coordinación y visibilidad.
+                </p>
+              </div>
             </div>
-          </li>
-
-          <li class="li">
-            <span class="dot ok" style="margin-top:6px"></span>
-            <div>
-              <b>Paris (Ville de Paris) — participación en Waze for Cities</b>
-              Existe una deliberación pública relativa a la participación de la Ville de Paris en el programa “Waze for Cities”.
+            <div class="b-metrics">
+              <div class="metric">
+                <div class="n">Datos + incidentes</div>
+                <div class="l">Visibilidad operativa</div>
+              </div>
+              <div class="metric">
+                <div class="n">Coordinación</div>
+                <div class="l">Obras / eventos / cierres</div>
+              </div>
             </div>
-          </li>
-
-          <li class="li">
-            <span class="dot ok" style="margin-top:6px"></span>
-            <div>
-              <b>Escala del programa</b>
-              Waze for Cities describe colaboración con <span class="em">más de mil ciudades</span> y socios públicos a nivel global (intercambio de datos públicos para objetivos de movilidad/seguridad).
-            </div>
-          </li>
-
-          <li class="li">
-            <span class="dot warn" style="margin-top:6px"></span>
-            <div>
-              <b>Optimización “sin IA” (sistemas clásicos) con resultados fuertes</b>
-              Ejemplos de control adaptativo de semáforos usados por grandes ciudades:
-              <span class="em">SCOOT (Londres)</span> y <span class="em">SCATS</span>.
-              Son sistemas de optimización avanzada (adaptativos), normalmente basados en sensores/algoritmos de control, sin depender de “IA” generativa.
-            </div>
-          </li>
-        </ul>
-
-        <div class="sep"></div>
-
-        <div class="grid">
-          <div class="card" style="grid-column:span 6">
-            <h3>Resultados publicados (ejemplos)</h3>
-            <p>
-              • <b>SCOOT (Londres)</b>: el sistema se asocia a ~<b>12% de reducción promedio de demora</b> y ~<b>8% menos paradas</b> donde está instalado.<br/>
-              • <b>SCATS</b>: material oficial menciona mejoras como <b>28% de reducción de tiempo de viaje</b> y <b>25% menos paradas</b> (según brochure).
-            </p>
+            <div class="hint">Uso aquí: demostrar viabilidad de colaboración pública + enfoque “bajo riesgo”.</div>
           </div>
-          <div class="card" style="grid-column:span 6">
-            <h3>“Competidores” (datos / analítica, no control)</h3>
-            <p>
-              • Índices y analítica de congestión: <b>TomTom Traffic Index</b>, <b>INRIX</b> (scorecards).<br/>
-              • Urban Flow se diferencia por: integrar datos + simulación + piloto supervisado (y, si se habilita, prioridad emergencias).
-            </p>
+
+          <div class="benefit">
+            <div class="b-head">
+              <div class="icon" aria-hidden="true">
+                <!-- building icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M6 22V3h12v19" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/>
+                  <path d="M9 7h1M9 11h1M9 15h1M14 7h1M14 11h1M14 15h1" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="b-title">Paris — participación pública (Waze for Cities)</h3>
+                <p class="b-sub">
+                  Existencia de deliberación pública relativa a la participación. Sirve como precedente de adopción institucional.
+                </p>
+              </div>
+            </div>
+            <div class="b-metrics">
+              <div class="metric">
+                <div class="n">Precedente</div>
+                <div class="l">Marco público/municipal</div>
+              </div>
+              <div class="metric">
+                <div class="n">Datos compartidos</div>
+                <div class="l">Cierres / eventos</div>
+              </div>
+            </div>
+            <div class="hint">Uso aquí: “esto ya se hace en capitales”, sin prometer cifras para Lima.</div>
+          </div>
+
+          <div class="benefit">
+            <div class="b-head">
+              <div class="icon" aria-hidden="true">
+                <!-- traffic light icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M10 2h4v20h-4z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                  <circle cx="12" cy="6" r="1.8" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                  <circle cx="12" cy="12" r="1.8" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                  <circle cx="12" cy="18" r="1.8" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="b-title">Optimización “clásica” (sin IA generativa): SCOOT / SCATS</h3>
+                <p class="b-sub">
+                  Sistemas adaptativos de semáforos y control de tráfico con beneficios medibles (según material público). Sirve para mostrar que incluso sin “IA”, la optimización aporta resultados.
+                </p>
+              </div>
+            </div>
+            <div class="b-metrics">
+              <div class="metric">
+                <div class="n">~12%</div>
+                <div class="l">↓ demora (SCOOT, promedio donde instalado)</div>
+              </div>
+              <div class="metric">
+                <div class="n">~8%</div>
+                <div class="l">↓ paradas (SCOOT)</div>
+              </div>
+              <div class="metric">
+                <div class="n">28% / 25%</div>
+                <div class="l">↓ tiempo / ↓ paradas (SCATS, brochure)</div>
+              </div>
+            </div>
+            <div class="hint">Urban Flow se posiciona como: datos + histórico + simulación + piloto supervisado.</div>
+          </div>
+
+          <div class="benefit">
+            <div class="b-head">
+              <div class="icon" aria-hidden="true">
+                <!-- globe icon -->
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                  <path d="M2 12h20" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                  <path d="M12 2c3 3 3 17 0 20-3-3-3-17 0-20Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="b-title">Escala de programas de datos públicos</h3>
+                <p class="b-sub">
+                  Programas tipo “for Cities” se plantean como colaboración a gran escala con múltiples ciudades. Útil para reforzar viabilidad institucional.
+                </p>
+              </div>
+            </div>
+            <div class="b-metrics">
+              <div class="metric">
+                <div class="n">Escalable</div>
+                <div class="l">Modelo multi-ciudad</div>
+              </div>
+              <div class="metric">
+                <div class="n">Bajo riesgo</div>
+                <div class="l">Primero datos, luego piloto</div>
+              </div>
+            </div>
+            <div class="hint">Mensaje: “empezar pequeño, medir, escalar”.</div>
           </div>
         </div>
 
         <div class="sep"></div>
-
         <p class="notice">
-          <b>Importante (tono institucional):</b> presentar estas referencias como “pruebas de viabilidad” y “beneficios medibles”,
-          no como promesa automática para Lima. La propuesta Urban Flow se apoya en el mismo enfoque: baseline → simulación → piloto → KPI.
+          <b>Importante (tono institucional):</b> usar estas referencias como “prueba de viabilidad” y “beneficios medibles”,
+          sin prometer el mismo impacto para Lima hasta tener baseline + piloto.
         </p>
       </div>
     </section>
 
     <div class="footer">
-      <span>© <span id="y"></span> · Urban Flow (uso interno) · OSM listo · Google/Waze previsto</span>
+      <span>© <span id="y"></span> · Urban Flow (uso interno) · OSM listo · Snap-to-road + timeline</span>
       <span class="pill"><span class="dot ok"></span> Fallback seguro: OSM</span>
     </div>
   </div>
@@ -520,12 +691,15 @@
   <script>
     document.getElementById("y").textContent = new Date().getFullYear();
 
-    // ====== CONFIG (opcional) ======
-    // Si quieres habilitar Google Maps JS, pon tu key:
-    const YOUR_GOOGLE_MAPS_API_KEY = ""; // <-- pega aquí (o deja vacío)
+    // ====== CONFIG ======
+    const YOUR_GOOGLE_MAPS_API_KEY = ""; // (opcional) no usada aquí
 
     // Centro inicial (Lima)
     const LIMA = { lat: -12.0464, lng: -77.0428, z: 12 };
+
+    // OSRM public endpoint (snap-to-road via route)
+    // Nota: es un endpoint público. Para producción, lo ideal es usar tu propio OSRM o proveedor.
+    const OSRM_ROUTE = "https://router.project-osrm.org/route/v1/driving/";
 
     // ====== Map init (OSM) ======
     const map = L.map('map', { zoomControl: true }).setView([LIMA.lat, LIMA.lng], LIMA.z);
@@ -536,33 +710,79 @@
     }).addTo(map);
 
     // Base layers (placeholders)
-    let googleLayer = null;   // (opcional, si implementas un tile proxy o plugin)
-    let wazeLayer = null;     // (placeholder: Waze for Cities normalmente se consume vía Partner Hub / feeds)
+    let googleLayer = null;
+    let wazeLayer = null;
 
-    // ====== Demo layers (mock) ======
-    // Congestion mock: polyline segments with severity styles
-    const trafficLayer = L.layerGroup();
-    const incidentsLayer = L.layerGroup();
-    const closuresLayer = L.layerGroup();
+    // ====== Layers ======
+    const trafficLayer = L.layerGroup().addTo(map);
+    const incidentsLayer = L.layerGroup().addTo(map);
+    const closuresLayer = L.layerGroup(); // off by default
 
-    function addTrafficMock(){
-      trafficLayer.clearLayers();
-      const segments = [
-        { pts:[[-12.089, -77.050],[-12.080, -77.038],[-12.070, -77.030]], level:"high", name:"Eje A (mock)" },
-        { pts:[[-12.060, -77.080],[-12.050, -77.070],[-12.042, -77.060]], level:"med", name:"Eje B (mock)" },
-        { pts:[[-12.030, -77.045],[-12.020, -77.040],[-12.010, -77.036]], level:"low", name:"Eje C (mock)" }
-      ];
-      const styleBy = (lvl)=>({
-        color: lvl==="high" ? "#fb7185" : (lvl==="med" ? "#fbbf24" : "#34d399"),
-        weight: lvl==="high" ? 7 : (lvl==="med" ? 6 : 5),
-        opacity: 0.85
-      });
-      segments.forEach(s=>{
-        const line = L.polyline(s.pts, styleBy(s.level)).bindPopup(
-          `<b>Congestión</b><br/>${s.name}<br/><span class="mono">Nivel:</span> ${s.level}`
-        );
-        trafficLayer.addLayer(line);
-      });
+    // ====== Timeline model (demo) ======
+    // 10 pasos temporales (replay). Ajusta a 24h/7d/etc. cuando tengas datos reales.
+    const timeline = Array.from({length: 10}).map((_,i)=>{
+      const h = (8 + i) % 24;
+      return `2026-02-19 ${String(h).padStart(2,'0')}:00`;
+    });
+
+    // Segment definitions (anchors). The route geometry will be snapped via OSRM.
+    // Each segment has severity per timeline step (low/med/high)
+    const segmentDefs = [
+      {
+        id: "segA",
+        name: "Eje A (mock)",
+        anchors: [
+          [-12.089, -77.050],
+          [-12.080, -77.038],
+          [-12.070, -77.030],
+        ],
+        levels: ["med","high","high","med","med","low","low","med","high","high"]
+      },
+      {
+        id: "segB",
+        name: "Eje B (mock)",
+        anchors: [
+          [-12.060, -77.080],
+          [-12.050, -77.070],
+          [-12.042, -77.060],
+        ],
+        levels: ["low","low","med","med","med","low","low","low","med","med"]
+      },
+      {
+        id: "segC",
+        name: "Eje C (mock)",
+        anchors: [
+          [-12.030, -77.045],
+          [-12.020, -77.040],
+          [-12.010, -77.036],
+        ],
+        levels: ["low","med","med","low","low","low","med","med","low","low"]
+      }
+    ];
+
+    // Will store snapped polylines
+    const segmentLines = new Map(); // id -> L.Polyline
+
+    // ====== Styling ======
+    function styleBy(level){
+      const color = level==="high" ? "#fb7185" : (level==="med" ? "#fbbf24" : "#34d399");
+      const weight = level==="high" ? 7 : (level==="med" ? 6 : 5);
+      return { color, weight, opacity: 0.88, lineCap:"round", lineJoin:"round" };
+    }
+
+    // ====== OSRM snap-to-road ======
+    async function snapRouteOSRM(anchors){
+      // Build coords string "lon,lat;lon,lat;..."
+      const coords = anchors.map(([lat,lng]) => `${lng},${lat}`).join(";");
+      const url = `${OSRM_ROUTE}${coords}?overview=full&geometries=geojson&steps=false`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+      const json = await res.json();
+      const route = json?.routes?.[0];
+      const geom = route?.geometry?.coordinates; // [lon,lat]
+      if(!geom || !geom.length) throw new Error("OSRM no geometry");
+      // Convert to Leaflet latlngs
+      return geom.map(([lon,lat]) => [lat,lon]);
     }
 
     function addIncidentsMock(){
@@ -592,13 +812,64 @@
       closuresLayer.addLayer(area);
     }
 
-    addTrafficMock();
     addIncidentsMock();
     addClosuresMock();
 
-    // Enable default layers
-    trafficLayer.addTo(map);
-    incidentsLayer.addTo(map);
+    // ====== Traffic render ======
+    let tIndex = 0;
+
+    function updateTimelineLabel(){
+      document.getElementById("tLabel").textContent = timeline[tIndex] ?? "—";
+    }
+
+    function updateTrafficStyles(){
+      segmentDefs.forEach(def=>{
+        const lvl = def.levels[tIndex] ?? "low";
+        const line = segmentLines.get(def.id);
+        if(!line) return;
+        line.setStyle(styleBy(lvl));
+        line.setPopupContent(
+          `<b>Congestión</b><br/>${def.name}<br/><span class="mono">Nivel:</span> ${lvl}<br/><span class="mono">Tiempo:</span> ${timeline[tIndex]}`
+        );
+      });
+    }
+
+    async function buildTrafficLayer(){
+      trafficLayer.clearLayers();
+      segmentLines.clear();
+
+      const status = document.getElementById("snapStatus");
+      status.textContent = "Generando rutas sobre calles (OSRM)…";
+
+      let snappedOK = 0;
+      for (const def of segmentDefs){
+        let latlngs = null;
+        try{
+          latlngs = await snapRouteOSRM(def.anchors);
+          snappedOK += 1;
+        }catch(err){
+          // fallback to anchors as straight segments
+          latlngs = def.anchors;
+        }
+
+        const lvl = def.levels[tIndex] ?? "low";
+        const line = L.polyline(latlngs, styleBy(lvl))
+          .bindPopup(
+            `<b>Congestión</b><br/>${def.name}<br/><span class="mono">Nivel:</span> ${lvl}<br/><span class="mono">Tiempo:</span> ${timeline[tIndex]}`
+          );
+
+        trafficLayer.addLayer(line);
+        segmentLines.set(def.id, line);
+      }
+
+      if(snappedOK === segmentDefs.length){
+        status.textContent = `OK: rutas alineadas a calles (OSRM) · ${snappedOK}/${segmentDefs.length}`;
+      }else{
+        status.textContent = `Parcial: OSRM ${snappedOK}/${segmentDefs.length} · fallback en algunas rutas (líneas simples)`;
+      }
+
+      updateTrafficStyles();
+    }
 
     // ====== UI toggles ======
     const tgTraffic = document.getElementById("tgTraffic");
@@ -624,7 +895,6 @@
       if(!bmOSM.checked){ bmOSM.checked = true; return; }
       resetBaseToggles("bmOSM");
       if(!map.hasLayer(osm)) osm.addTo(map);
-      // remove placeholders
       if(googleLayer && map.hasLayer(googleLayer)) map.removeLayer(googleLayer);
       if(wazeLayer && map.hasLayer(wazeLayer)) map.removeLayer(wazeLayer);
     });
@@ -633,22 +903,14 @@
       if(!bmGoogle.checked) return;
       resetBaseToggles("bmGoogle");
 
-      // Para evitar problemas de licencias/ToS, NO implementamos aquí “Google tiles” como tiles directos.
-      // Lo correcto es integrar Google Maps JS API en un contenedor separado o usar una integración aprobada.
-      // Esta demo deja un placeholder institucional:
-      if(!YOUR_GOOGLE_MAPS_API_KEY){
-        alert("Google Maps requiere API key. Pega la key en YOUR_GOOGLE_MAPS_API_KEY (archivo) y define una integración aprobada.");
-        bmOSM.checked = true; bmGoogle.checked = false;
-        return;
-      }
-      alert("Placeholder: integración Google Maps prevista (con API key). En esta demo mantenemos OSM como mapa base.");
+      alert("Integración Google Maps: prevista (requiere implementación aprobada + API key). Se mantiene OSM como base en esta demo.");
       bmOSM.checked = true; bmGoogle.checked = false;
     });
 
     bmWaze.addEventListener("change", ()=>{
       if(!bmWaze.checked) return;
       resetBaseToggles("bmWaze");
-      alert("Waze: previsto vía Waze for Cities (Partner Hub / feeds). Requiere autorización institucional. Se mantiene OSM como base.");
+      alert("Waze: previsto vía Waze for Cities (feeds / Partner Hub). Requiere autorización institucional. Se mantiene OSM como base.");
       bmOSM.checked = true; bmWaze.checked = false;
     });
 
@@ -670,6 +932,60 @@
         const el=document.querySelector(id); if(!el) return;
         e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'});
       });
+    });
+
+    // ====== Timeline controls ======
+    const tSlider = document.getElementById("tSlider");
+    const btnPlay = document.getElementById("btnPlay");
+    const btnStepBack = document.getElementById("btnStepBack");
+    const btnStepFwd = document.getElementById("btnStepFwd");
+
+    let playing = false;
+    let timer = null;
+    const FPS_MS = 700; // vitesse replay (accéléré)
+
+    function setIndex(i){
+      tIndex = Math.max(0, Math.min(timeline.length - 1, i));
+      tSlider.value = String(tIndex);
+      updateTimelineLabel();
+      updateTrafficStyles();
+    }
+
+    function play(){
+      if(playing) return;
+      playing = true;
+      btnPlay.textContent = "⏸ Pausar";
+      timer = setInterval(()=>{
+        if(tIndex >= timeline.length - 1){
+          // loop
+          setIndex(0);
+        }else{
+          setIndex(tIndex + 1);
+        }
+      }, FPS_MS);
+    }
+
+    function pause(){
+      playing = false;
+      btnPlay.textContent = "▶ Reproducir";
+      if(timer) clearInterval(timer);
+      timer = null;
+    }
+
+    btnPlay.addEventListener("click", ()=>{
+      playing ? pause() : play();
+    });
+    btnStepBack.addEventListener("click", ()=> setIndex(tIndex - 1));
+    btnStepFwd.addEventListener("click", ()=> setIndex(tIndex + 1));
+    tSlider.addEventListener("input", (e)=>{
+      pause();
+      setIndex(parseInt(e.target.value, 10));
+    });
+
+    // Init
+    updateTimelineLabel();
+    buildTrafficLayer().catch(()=>{
+      document.getElementById("snapStatus").textContent = "Error OSRM: usando fallback (líneas simples).";
     });
   </script>
 </body>
