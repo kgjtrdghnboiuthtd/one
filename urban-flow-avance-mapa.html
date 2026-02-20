@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Urban Flow — Estado de Avance & Mapa Operativo (Lima)</title>
-  <meta name="description" content="Dashboard institucional: avance del proyecto + mapa de tráfico (OSM) con compatibilidad Google Maps y opción Waze for Cities." />
+  <title>Urban Flow — Centro de Control (Demo) · Lima</title>
+  <meta name="description" content="Centro de control: mapa OSM + congestion snap-to-road + timeline + incidentes + corredor hospitalario (onda verde) en modo demo institucional." />
   <link rel="preconnect" href="https://tile.openstreetmap.org" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
@@ -19,6 +19,8 @@
       --ok:#34d399;
       --warn:#fbbf24;
       --bad:#fb7185;
+      --bg0:#070a14;
+      --bg1:#0b1020;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -29,18 +31,19 @@
       background:
         radial-gradient(1200px 700px at 15% 10%, rgba(103,232,249,.16), transparent 55%),
         radial-gradient(900px 600px at 85% 30%, rgba(167,139,250,.16), transparent 55%),
-        linear-gradient(180deg, #070a14 0%, #0b1020 45%, #070a14 100%);
+        linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 45%, var(--bg0) 100%);
       overflow-x:hidden;
     }
     a{color:inherit}
+
     .nav{
       position:sticky;top:0;z-index:50;
       backdrop-filter: blur(14px);
-      background: linear-gradient(180deg, rgba(7,10,20,.80), rgba(7,10,20,.42));
+      background: linear-gradient(180deg, rgba(7,10,20,.82), rgba(7,10,20,.46));
       border-bottom:1px solid var(--line);
     }
     .nav-inner{
-      max-width:1280px;margin:0 auto;
+      max-width:1320px;margin:0 auto;
       padding:10px 16px;
       display:flex;align-items:center;justify-content:space-between;gap:12px
     }
@@ -62,7 +65,7 @@
       0%,100%{transform:translate(0,0) rotate(12deg)}
       50%{transform:translate(14px,-10px) rotate(12deg)}
     }
-    .brand h1{margin:0;font-size:13px;letter-spacing:.25px;color:var(--muted);font-weight:750}
+    .brand h1{margin:0;font-size:13px;letter-spacing:.25px;color:var(--muted);font-weight:780}
     .nav-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
     .nav-links a{
       text-decoration:none;
@@ -74,7 +77,7 @@
     }
     .nav-links a:hover{border-color:var(--line);color:var(--text);background:rgba(255,255,255,.04)}
 
-    .wrap{max-width:1280px;margin:0 auto;padding:18px 16px 70px}
+    .wrap{max-width:1320px;margin:0 auto;padding:16px 16px 70px}
 
     .panel{
       border:1px solid var(--line);
@@ -90,7 +93,7 @@
       background: radial-gradient(800px 220px at 20% 0%, rgba(103,232,249,.14), transparent 55%),
                   radial-gradient(800px 220px at 80% 0%, rgba(167,139,250,.12), transparent 55%);
       pointer-events:none;
-      opacity:.85;
+      opacity:.90;
     }
     .panel > *{position:relative}
 
@@ -101,19 +104,59 @@
     .section-title h2{margin:0;font-size:16px;letter-spacing:-.2px}
     .section-title span{color:var(--muted);font-size:12.2px}
 
+    /* KPI Row */
+    .kpi-grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .kpi{
+      grid-column:span 3;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius: 20px;
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+      min-height: 92px;
+    }
+    @media(max-width:1020px){.kpi{grid-column:span 6}}
+    @media(max-width:560px){.kpi{grid-column:span 12}}
+    .kpi:before{
+      content:"";position:absolute;inset:-1px;
+      background: radial-gradient(700px 220px at 15% 0%, rgba(103,232,249,.12), transparent 55%),
+                  radial-gradient(700px 220px at 85% 0%, rgba(167,139,250,.10), transparent 55%);
+      opacity:.9;pointer-events:none;
+    }
+    .kpi > *{position:relative}
+    .kpi .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .kpi .label{color:var(--muted);font-size:12.2px}
+    .kpi .val{font-size:22px;font-weight:930;letter-spacing:-.4px;margin-top:6px}
+    .kpi .sub{color:var(--muted);font-size:12.1px;margin-top:6px;line-height:1.4}
+    .kpi .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
     /* Mid layout */
     .mid{
       display:grid;
       grid-template-columns: 1.45fr .55fr;
       gap:14px;
-      margin-top:14px;
       align-items:stretch;
     }
     @media(max-width:1020px){.mid{grid-template-columns:1fr}}
 
     #map{
       width:100%;
-      height:600px;
+      height:610px;
       border-radius:16px;
       overflow:hidden;
       border:1px solid rgba(255,255,255,.12);
@@ -131,6 +174,7 @@
     .control h4{margin:0 0 10px;font-size:12.8px;color:var(--text)}
     .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
     .row label{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12.3px;cursor:pointer}
+
     .toggle{
       appearance:none;
       width:44px;height:26px;border-radius:999px;
@@ -162,10 +206,11 @@
       background:rgba(255,255,255,.04);
       color:var(--text);
       text-decoration:none;
-      font-weight:800;
+      font-weight:860;
       font-size:12.5px;
       transition:.18s ease;
       cursor:pointer;
+      user-select:none;
     }
     .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
     .btn.primary{
@@ -188,7 +233,7 @@
     .dot.bad{background:var(--bad)}
     .sep{height:1px;background:var(--line);margin:12px 0}
     .notice{color:var(--muted);font-size:12.2px;line-height:1.55;margin:0}
-    .em{color:rgba(255,255,255,.86);font-weight:800}
+    .em{color:rgba(255,255,255,.86);font-weight:860}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
 
     /* Timeline */
@@ -203,6 +248,22 @@
     .t-top .left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .t-top .stamp{color:var(--muted);font-size:12.2px}
     .slider{width:100%;margin-top:10px;accent-color: var(--accent);}
+
+    /* Mini chart */
+    .chart-wrap{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    canvas{
+      width:100%;
+      height:120px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.02);
+      border-radius:16px;
+      display:block;
+    }
 
     /* Incidents side */
     .inc-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
@@ -234,7 +295,7 @@
       margin-top:10px;
       display:grid;
       gap:10px;
-      max-height: 420px;
+      max-height: 350px;
       overflow:auto;
       padding-right:6px;
     }
@@ -248,7 +309,7 @@
     }
     .inc:hover{transform:translateY(-1px); background:rgba(255,255,255,.04)}
     .inc .toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
-    .inc .type{font-weight:850;font-size:12.8px;letter-spacing:-.15px}
+    .inc .type{font-weight:900;font-size:12.8px;letter-spacing:-.15px}
     .inc .meta{color:var(--muted);font-size:12.2px;margin-top:6px;line-height:1.45}
     .badge{
       display:inline-flex;align-items:center;gap:8px;
@@ -264,6 +325,26 @@
       display:flex;gap:8px;flex-wrap:wrap;margin-top:10px
     }
 
+    /* Emergency strip */
+    .emg{
+      border:1px solid rgba(255,255,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border-radius:16px;
+      padding:12px;
+    }
+    .emg .head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .emg .title{font-weight:900;letter-spacing:-.2px}
+    .emg .meta{color:var(--muted);font-size:12.2px;line-height:1.45;margin-top:8px}
+    .emg .row2{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    .emg .stat{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:14px;
+      padding:10px 12px;
+      min-width: 140px;
+    }
+    .emg .stat .n{font-size:14px;font-weight:950}
+    .emg .stat .l{color:var(--muted);font-size:12.1px;margin-top:4px}
     .footer{
       margin-top:18px;
       color:var(--muted);
@@ -280,19 +361,69 @@
     <div class="nav-inner">
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
-        <h1>Urban Flow · Mapa operativo — Lima (demo)</h1>
+        <h1>Urban Flow · Centro de Control (Demo) — Lima</h1>
       </div>
       <div class="nav-links">
+        <a href="#control">Control</a>
         <a href="#mapa">Mapa</a>
       </div>
     </div>
   </div>
 
   <div class="wrap">
-    <div class="panel" id="mapa">
+    <div class="panel" id="control">
+      <div class="section-title">
+        <h2>Estado operativo (KPI) · sincronizado con la timeline</h2>
+        <span>modo demo institucional · sin promesas (baseline → piloto → KPI reales)</span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="top">
+            <div class="label">Congestión promedio</div>
+            <span class="badge"><span class="dot warn"></span> Histórico</span>
+          </div>
+          <div id="kpiCong" class="val">—</div>
+          <div id="kpiCongSub" class="sub">—</div>
+        </div>
+
+        <div class="kpi">
+          <div class="top">
+            <div class="label">Incidentes activos</div>
+            <span class="badge"><span class="dot bad"></span> Operativo</span>
+          </div>
+          <div id="kpiInc" class="val">—</div>
+          <div id="kpiIncSub" class="sub">—</div>
+        </div>
+
+        <div class="kpi">
+          <div class="top">
+            <div class="label">Índice de fluidez</div>
+            <span class="badge"><span class="dot ok"></span> Score</span>
+          </div>
+          <div id="kpiFlow" class="val">—</div>
+          <div id="kpiFlowSub" class="sub">—</div>
+        </div>
+
+        <div class="kpi">
+          <div class="top">
+            <div class="label">ETA Emergencias (demo)</div>
+            <span class="badge"><span class="dot ok"></span> Onda verde</span>
+          </div>
+          <div id="kpiEta" class="val">—</div>
+          <div id="kpiEtaSub" class="sub">Activar “Corredor Hospitalario”</div>
+        </div>
+      </div>
+
+      <div class="chart-wrap">
+        <canvas id="miniChart" width="1200" height="240" aria-label="Mini chart KPI"></canvas>
+      </div>
+    </div>
+
+    <div class="panel" id="mapa" style="margin-top:14px">
       <div class="section-title">
         <h2>Mapa operativo (Lima)</h2>
-        <span>~15 rutas históricas · snap-to-road · timeline · incidentes</span>
+        <span>~15 rutas snap-to-road · timeline · incidentes · corredor hospitalario</span>
       </div>
 
       <div class="mid">
@@ -320,13 +451,38 @@
             </div>
             <div class="sep"></div>
             <p class="notice">
-              En producción, la “timeline” se alimenta de histórico real (por hora/día) y es base para calibración del modelo y simulación.
+              En producción, la timeline se alimenta de histórico real y sirve para calibración del modelo y simulación.
             </p>
           </div>
         </div>
 
         <!-- RIGHT: INCIDENTS + CONTROLS -->
         <div class="controls">
+
+          <div class="emg">
+            <div class="head">
+              <div class="title">🚑 Corredor Hospitalario (Waouh+)</div>
+              <button id="btnCorridor" class="btn primary" type="button">Activar</button>
+            </div>
+            <div class="meta">
+              Calcula una ruta (OSRM) y simula “onda verde” (demo). Ideal para explicar prioridad de emergencias de forma supervisada.
+            </div>
+            <div class="row2">
+              <div class="stat">
+                <div id="emgDist" class="n">—</div>
+                <div class="l">Distancia</div>
+              </div>
+              <div class="stat">
+                <div id="emgEta" class="n">—</div>
+                <div class="l">ETA estimada</div>
+              </div>
+              <div class="stat">
+                <div id="emgMode" class="n">OFF</div>
+                <div class="l">Estado</div>
+              </div>
+            </div>
+          </div>
+
           <div class="control">
             <h4>Capas</h4>
             <div class="row">
@@ -376,6 +532,7 @@
             <div class="sep"></div>
             <p class="notice">Ajusta presets según distrito piloto definido con el Ministerio.</p>
           </div>
+
         </div>
       </div>
 
@@ -395,6 +552,13 @@
     const LIMA = { lat: -12.0464, lng: -77.0428, z: 12 };
     const OSRM_ROUTE = "https://router.project-osrm.org/route/v1/driving/";
 
+    // Emergency (demo) endpoints: (Miraflores -> Hospital area / Centro)
+    // Ajuste rapide: remplace ces coords avec hôpital réel + zone d’intervention, si besoin.
+    const EMG = {
+      from: { name:"Miraflores (demo)", lat:-12.1210, lng:-77.0300 },
+      to:   { name:"Cercado / Hospital (demo)", lat:-12.0565, lng:-77.0460 }
+    };
+
     // ====== Map init ======
     const map = L.map('map', { zoomControl: true }).setView([LIMA.lat, LIMA.lng], LIMA.z);
     const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -406,9 +570,9 @@
     const trafficLayer = L.layerGroup().addTo(map);
     const incidentsLayer = L.layerGroup().addTo(map);
     const closuresLayer = L.layerGroup(); // off by default
+    const corridorLayer = L.layerGroup().addTo(map); // on demand (polyline + moving marker)
 
     // ====== Timeline ======
-    // 12 pasos (más realista). Puedes cambiar a 24 o 48 sin problema.
     const timeline = Array.from({length: 12}).map((_,i)=>{
       const h = (7 + i) % 24;
       return `2026-02-19 ${String(h).padStart(2,'0')}:00`;
@@ -427,6 +591,11 @@
       const weight = level==="high" ? 7 : (level==="med" ? 6 : 5);
       return { color, weight, opacity: 0.88, lineCap:"round", lineJoin:"round" };
     }
+    function sevColor(sev){
+      if(sev==="Alta") return "#fb7185";
+      if(sev==="Media") return "#fbbf24";
+      return "#34d399";
+    }
 
     // ====== OSRM snap-to-road ======
     async function snapRouteOSRM(anchors){
@@ -441,10 +610,25 @@
       return geom.map(([lon,lat]) => [lat,lon]);
     }
 
-    // ====== Build ~15 traffic segments (mock but realistic density) ======
-    // Anchors are around Lima (approx). In production these come from real corridors.
+    async function routeOSRM(from, to){
+      const coords = `${from.lng},${from.lat};${to.lng},${to.lat}`;
+      const url = `${OSRM_ROUTE}${coords}?overview=full&geometries=geojson&steps=false`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
+      const json = await res.json();
+      const route = json?.routes?.[0];
+      if(!route) throw new Error("OSRM no route");
+      const geom = route.geometry?.coordinates || [];
+      const latlngs = geom.map(([lon,lat]) => [lat,lon]);
+      return {
+        latlngs,
+        distance_m: route.distance || 0,
+        duration_s: route.duration || 0
+      };
+    }
+
+    // ====== Build ~15 traffic segments ======
     function mkLevels(seed){
-      // deterministic-ish pattern
       const base = ["low","low","med","med","high","high","med","low","low","med","high","med"];
       return base.map((v, i)=>{
         const n = (seed * 7 + i * 3) % 10;
@@ -472,7 +656,7 @@
       { id:"s15", name:"Corredor 15 (mock)", anchors:[[-12.110,-77.095],[-12.100,-77.085],[-12.090,-77.075]], levels:mkLevels(15) }
     ];
 
-    const segmentLines = new Map(); // id -> polyline
+    const segmentLines = new Map();
     let snappedOK = 0;
 
     function updateTrafficStyles(){
@@ -525,31 +709,24 @@
       updateTrafficStyles();
     }
 
-    // ====== Incidents model synced with timeline ======
-    // Each incident has active steps range [start,end] and severity.
+    // ====== Incidents synced with timeline ======
     const incidentDefs = [
-      { id:"i1",  type:"Accidente", sev:"Alta",   note:"Posible carril bloqueado",    lat:-12.076, lng:-77.037, start:1, end:5, tags:["accidente","vía"] },
-      { id:"i2",  type:"Vehículo detenido", sev:"Media", note:"Requiere verificación", lat:-12.048, lng:-77.060, start:0, end:3, tags:["vehículo"] },
-      { id:"i3",  type:"Obstáculo", sev:"Baja",  note:"Reporte ciudadano",            lat:-12.017, lng:-77.043, start:4, end:9, tags:["obstáculo"] },
-      { id:"i4",  type:"Cierre por obra", sev:"Media", note:"Desvío sugerido",        lat:-12.055, lng:-77.055, start:2, end:11, tags:["Cierre","obra"] },
-      { id:"i5",  type:"Evento / marcha", sev:"Alta",  note:"Alta densidad",          lat:-12.046, lng:-77.042, start:6, end:11, tags:["evento"] },
-      { id:"i6",  type:"Semáforo fuera de servicio", sev:"Media", note:"Gestión manual", lat:-12.070, lng:-77.055, start:3, end:7, tags:["semaforo"] },
-      { id:"i7",  type:"Choque menor", sev:"Baja", note:"Tránsito lento",             lat:-12.095, lng:-77.045, start:7, end:10, tags:["accidente"] },
-      { id:"i8",  type:"Cierre parcial", sev:"Media", note:"Carril reducido",         lat:-12.020, lng:-77.070, start:0, end:11, tags:["Cierre"] }
+      { id:"i1", type:"Accidente", sev:"Alta", note:"Posible carril bloqueado", lat:-12.076, lng:-77.037, start:1, end:5, tags:["accidente","vía"] },
+      { id:"i2", type:"Vehículo detenido", sev:"Media", note:"Requiere verificación", lat:-12.048, lng:-77.060, start:0, end:3, tags:["vehículo"] },
+      { id:"i3", type:"Obstáculo", sev:"Baja", note:"Reporte ciudadano", lat:-12.017, lng:-77.043, start:4, end:9, tags:["obstáculo"] },
+      { id:"i4", type:"Cierre por obra", sev:"Media", note:"Desvío sugerido", lat:-12.055, lng:-77.055, start:2, end:11, tags:["Cierre","obra"] },
+      { id:"i5", type:"Evento / marcha", sev:"Alta", note:"Alta densidad", lat:-12.046, lng:-77.042, start:6, end:11, tags:["evento"] },
+      { id:"i6", type:"Semáforo fuera de servicio", sev:"Media", note:"Gestión manual", lat:-12.070, lng:-77.055, start:3, end:7, tags:["semaforo"] },
+      { id:"i7", type:"Choque menor", sev:"Baja", note:"Tránsito lento", lat:-12.095, lng:-77.045, start:7, end:10, tags:["accidente"] },
+      { id:"i8", type:"Cierre parcial", sev:"Media", note:"Carril reducido", lat:-12.020, lng:-77.070, start:0, end:11, tags:["Cierre"] }
     ];
-
-    const incidentMarkers = new Map(); // id -> marker
-    let highlightedMarker = null;
-
-    function sevColor(sev){
-      if(sev==="Alta") return "#fb7185";
-      if(sev==="Media") return "#fbbf24";
-      return "#34d399";
-    }
 
     function isIncidentActive(inc, idx){
       return idx >= inc.start && idx <= inc.end;
     }
+
+    const incidentMarkers = new Map();
+    let highlightedMarker = null;
 
     function renderIncidentMarkers(){
       incidentsLayer.clearLayers();
@@ -579,7 +756,6 @@
       map.flyTo([inc.lat, inc.lng], Math.max(map.getZoom(), 14), { duration: 0.8 });
       m.openPopup();
 
-      // highlight ring
       if(highlightedMarker){
         highlightedMarker.setStyle({ weight:2, radius:9 });
       }
@@ -587,7 +763,7 @@
       highlightedMarker = m;
     }
 
-    // ====== Incident side list (filters + search) ======
+    // ====== Incident side list ======
     const incList = document.getElementById("incList");
     const q = document.getElementById("q");
     let activeFilter = "all";
@@ -597,7 +773,6 @@
       if(activeFilter==="Cierre") return inc.tags.includes("Cierre") || inc.type.toLowerCase().includes("cierre");
       return inc.sev === activeFilter;
     }
-
     function matchesQuery(inc, query){
       if(!query) return true;
       const s = query.toLowerCase();
@@ -656,7 +831,7 @@
     });
     q.addEventListener("input", ()=> renderIncidentList());
 
-    // ====== Closures mock polygon (optional layer) ======
+    // ====== Closures mock ======
     function addClosuresMock(){
       closuresLayer.clearLayers();
       const area = L.polygon(
@@ -687,6 +862,316 @@
       map.flyTo([p.lat,p.lng], p.z, { duration: 0.9 });
     };
 
+    // ====== KPI / Chart (Waouh+) ======
+    const kpiCong = document.getElementById("kpiCong");
+    const kpiCongSub = document.getElementById("kpiCongSub");
+    const kpiInc = document.getElementById("kpiInc");
+    const kpiIncSub = document.getElementById("kpiIncSub");
+    const kpiFlow = document.getElementById("kpiFlow");
+    const kpiFlowSub = document.getElementById("kpiFlowSub");
+    const kpiEta = document.getElementById("kpiEta");
+    const kpiEtaSub = document.getElementById("kpiEtaSub");
+
+    function levelToScore(lvl){
+      // low=1, med=2, high=3
+      if(lvl==="high") return 3;
+      if(lvl==="med") return 2;
+      return 1;
+    }
+
+    function computeKPI(idx){
+      const segScores = segmentDefs.map(s => levelToScore(s.levels[idx] || "low"));
+      const avg = segScores.reduce((a,b)=>a+b,0) / Math.max(1, segScores.length);
+      const activeInc = incidentDefs.filter(inc => isIncidentActive(inc, idx)).length;
+
+      // Convert avg score -> percent congestion-ish
+      // avg=1 => 18%, avg=2 => 52%, avg=3 => 86% (rough demo)
+      const congPct = Math.round(18 + (avg-1) * 34);
+      const flowIdx = Math.max(0, Math.min(100, Math.round(100 - congPct + (activeInc * -2))));
+
+      return { congPct, flowIdx, activeInc };
+    }
+
+    // Build historical series for chart
+    const hist = timeline.map((_, i)=> computeKPI(i));
+
+    function drawMiniChart(currentIndex){
+      const canvas = document.getElementById("miniChart");
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0,0,W,H);
+
+      // Background grid
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "rgba(255,255,255,0.00)";
+      ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle = "rgba(255,255,255,0.10)";
+      ctx.lineWidth = 1;
+
+      const pad = 26;
+      const innerW = W - pad*2;
+      const innerH = H - pad*2;
+
+      // grid lines
+      for(let i=0;i<=4;i++){
+        const y = pad + (innerH*i/4);
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(pad+innerW, y);
+        ctx.stroke();
+      }
+
+      // series helpers
+      const N = hist.length;
+      const xAt = (i)=> pad + (innerW * (i/(N-1)));
+      const yCong = (v)=> pad + innerH * (1 - (v/100));     // 0..100
+      const yFlow = (v)=> pad + innerH * (1 - (v/100));     // 0..100
+      const yInc  = (v)=> {
+        // map 0..maxInc to 0..100 scale visually
+        const maxInc = Math.max(...hist.map(h=>h.activeInc), 1);
+        const pct = Math.min(100, Math.round((v/maxInc)*100));
+        return yFlow(pct);
+      };
+
+      function drawLine(getY, stroke){
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        for(let i=0;i<N;i++){
+          const x = xAt(i);
+          const y = getY(hist[i]);
+          if(i===0) ctx.moveTo(x,y);
+          else ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+
+      // 3 lines: Congestión, Fluidez, Incidentes
+      drawLine(h=> yCong(h.congPct), "rgba(251,113,133,0.95)"); // red-ish
+      drawLine(h=> yFlow(h.flowIdx), "rgba(52,211,153,0.92)");  // green-ish
+      drawLine(h=> yInc(h.activeInc), "rgba(251,191,36,0.92)"); // amber-ish
+
+      // Legend
+      ctx.fillStyle = "rgba(255,255,255,0.80)";
+      ctx.font = "700 14px ui-sans-serif, system-ui";
+      ctx.fillText("KPI histórico (demo)", pad, 20);
+
+      ctx.font = "600 12px ui-sans-serif, system-ui";
+      ctx.fillStyle = "rgba(251,113,133,0.95)";
+      ctx.fillText("Congestión", pad, H-10);
+      ctx.fillStyle = "rgba(52,211,153,0.92)";
+      ctx.fillText("Fluidez", pad+110, H-10);
+      ctx.fillStyle = "rgba(251,191,36,0.92)";
+      ctx.fillText("Incidentes", pad+190, H-10);
+
+      // Current cursor
+      const cx = xAt(currentIndex);
+      ctx.strokeStyle = "rgba(103,232,249,0.55)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, pad);
+      ctx.lineTo(cx, pad+innerH);
+      ctx.stroke();
+
+      // Current markers
+      function dot(x,y,fill){
+        ctx.fillStyle = fill;
+        ctx.beginPath();
+        ctx.arc(x,y,6,0,Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(7,10,20,0.75)";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      dot(cx, yCong(hist[currentIndex].congPct), "rgba(251,113,133,0.95)");
+      dot(cx, yFlow(hist[currentIndex].flowIdx), "rgba(52,211,153,0.92)");
+      dot(cx, yInc(hist[currentIndex].activeInc), "rgba(251,191,36,0.92)");
+    }
+
+    function updateKPICards(){
+      const { congPct, flowIdx, activeInc } = computeKPI(tIndex);
+
+      kpiCong.textContent = `${congPct}%`;
+      kpiCongSub.textContent = congPct > 70 ? "Alta congestión (priorizar desvíos)" : (congPct > 40 ? "Congestión moderada" : "Tráfico relativamente fluido");
+
+      kpiInc.textContent = String(activeInc);
+      kpiIncSub.textContent = activeInc > 4 ? "Alta carga operativa" : (activeInc > 2 ? "Carga media" : "Baja carga operativa");
+
+      kpiFlow.textContent = `${flowIdx}/100`;
+      kpiFlowSub.textContent = flowIdx > 65 ? "Capacidad estable" : (flowIdx > 45 ? "Atención: cuellos de botella" : "Riesgo de colapso local");
+
+      // ETA set by corridor mode
+      if(!corridorState.on){
+        kpiEta.textContent = "—";
+        kpiEtaSub.textContent = "Activar “Corredor Hospitalario”";
+      }else{
+        kpiEta.textContent = corridorState.etaText || "—";
+        kpiEtaSub.textContent = "Simulación con onda verde (demo)";
+      }
+
+      drawMiniChart(tIndex);
+    }
+
+    // ====== Corredor Hospitalario (Waouh+) ======
+    const btnCorridor = document.getElementById("btnCorridor");
+    const emgDist = document.getElementById("emgDist");
+    const emgEta = document.getElementById("emgEta");
+    const emgMode = document.getElementById("emgMode");
+
+    const corridorState = {
+      on: false,
+      route: null,
+      poly: null,
+      marker: null,
+      pulse: null,
+      anim: null,
+      progress: 0,
+      etaText: null
+    };
+
+    function metersToKm(m){ return (m/1000).toFixed(1); }
+    function secToMin(s){ return Math.max(1, Math.round(s/60)); }
+
+    function estimateEmergencyETA(baseDurationS){
+      // Demo model: improves with "onda verde" depending on congestion score
+      const { congPct } = computeKPI(tIndex);
+      const factor = 0.78 - (Math.min(80, congPct)/100)*0.10; // 0.70..0.78
+      const improved = Math.max(60, baseDurationS * factor);
+      return improved;
+    }
+
+    function interpLatLng(latlngs, t){
+      // t in [0,1]
+      if(!latlngs || latlngs.length < 2) return null;
+      const idx = Math.floor(t * (latlngs.length - 1));
+      const next = Math.min(latlngs.length - 1, idx + 1);
+      const frac = (t * (latlngs.length - 1)) - idx;
+      const a = latlngs[idx], b = latlngs[next];
+      return [a[0] + (b[0]-a[0])*frac, a[1] + (b[1]-a[1])*frac];
+    }
+
+    function startPulse(latlng){
+      stopPulse();
+      corridorState.pulse = L.circle(latlng, {
+        radius: 80,
+        color: "rgba(103,232,249,0.95)",
+        weight: 2,
+        fillColor: "rgba(103,232,249,0.22)",
+        fillOpacity: 0.22
+      }).addTo(corridorLayer);
+
+      let r = 80;
+      let dir = 1;
+      corridorState.anim = setInterval(()=>{
+        if(!corridorState.pulse) return;
+        r += dir * 18;
+        if(r > 180) dir = -1;
+        if(r < 80) dir = 1;
+        corridorState.pulse.setRadius(r);
+      }, 70);
+    }
+
+    function stopPulse(){
+      if(corridorState.anim){ clearInterval(corridorState.anim); corridorState.anim = null; }
+      if(corridorState.pulse){ corridorLayer.removeLayer(corridorState.pulse); corridorState.pulse = null; }
+    }
+
+    function stopCorridor(){
+      corridorState.on = false;
+      corridorState.route = null;
+      corridorState.progress = 0;
+      corridorState.etaText = null;
+
+      if(corridorState.poly){ corridorLayer.removeLayer(corridorState.poly); corridorState.poly = null; }
+      if(corridorState.marker){ corridorLayer.removeLayer(corridorState.marker); corridorState.marker = null; }
+      stopPulse();
+      if(corridorState.anim){ clearInterval(corridorState.anim); corridorState.anim = null; }
+
+      btnCorridor.textContent = "Activar";
+      emgMode.textContent = "OFF";
+      emgDist.textContent = "—";
+      emgEta.textContent = "—";
+      updateKPICards();
+    }
+
+    async function startCorridor(){
+      btnCorridor.textContent = "Cargando…";
+      emgMode.textContent = "ON";
+      corridorState.on = true;
+
+      try{
+        corridorLayer.clearLayers();
+        const r = await routeOSRM(EMG.from, EMG.to);
+        corridorState.route = r;
+
+        const distKm = metersToKm(r.distance_m);
+        const baseMin = secToMin(r.duration_s);
+        const emgS = estimateEmergencyETA(r.duration_s);
+        const emgMin = secToMin(emgS);
+
+        emgDist.textContent = `${distKm} km`;
+        emgEta.textContent = `${emgMin} min (vs ${baseMin} min)`;
+        corridorState.etaText = `${emgMin} min`;
+
+        // Corridor line (glow effect: two polylines)
+        const glow = L.polyline(r.latlngs, { color:"rgba(103,232,249,0.35)", weight: 12, opacity:0.45, lineCap:"round" });
+        const core = L.polyline(r.latlngs, { color:"rgba(103,232,249,0.95)", weight: 6, opacity:0.95, lineCap:"round" });
+        corridorState.poly = L.layerGroup([glow, core]).addTo(corridorLayer);
+
+        // Start marker at beginning + pulse
+        const start = r.latlngs[0];
+        corridorState.marker = L.circleMarker(start, {
+          radius: 9, color:"rgba(103,232,249,0.95)", fillColor:"rgba(103,232,249,0.95)", fillOpacity:0.95, weight:3
+        }).bindPopup(`<b>Corredor Hospitalario (demo)</b><br/>Onda verde activada<br/><span class="mono">ETA:</span> ${emgMin} min`).addTo(corridorLayer);
+
+        startPulse(start);
+
+        // Fit bounds
+        const bounds = L.latLngBounds(r.latlngs.map(p=>L.latLng(p[0],p[1])));
+        map.fitBounds(bounds.pad(0.18));
+
+        // Animate along route
+        if(corridorState.anim) clearInterval(corridorState.anim);
+        corridorState.progress = 0;
+        corridorState.anim = setInterval(()=>{
+          if(!corridorState.on || !corridorState.route) return;
+          corridorState.progress += 0.0048; // speed
+          if(corridorState.progress >= 1){
+            corridorState.progress = 1;
+            const end = r.latlngs[r.latlngs.length - 1];
+            corridorState.marker.setLatLng(end);
+            stopPulse();
+            startPulse(end);
+            corridorState.marker.openPopup();
+            // loop softly
+            corridorState.progress = 0;
+          }else{
+            const pos = interpLatLng(r.latlngs, corridorState.progress);
+            if(pos){
+              corridorState.marker.setLatLng(pos);
+              if(corridorState.pulse) corridorState.pulse.setLatLng(pos);
+            }
+          }
+        }, 45);
+
+        btnCorridor.textContent = "Desactivar";
+        updateKPICards();
+      }catch(e){
+        emgMode.textContent = "ERROR";
+        btnCorridor.textContent = "Reintentar";
+        corridorState.on = false;
+        corridorState.route = null;
+        corridorState.etaText = null;
+        updateKPICards();
+        alert("No se pudo calcular el corredor (OSRM). Manteniendo modo demo sin corredor.");
+      }
+    }
+
+    btnCorridor.addEventListener("click", ()=>{
+      if(corridorState.on) stopCorridor();
+      else startCorridor();
+    });
+
     // ====== Timeline controls ======
     const btnPlay = document.getElementById("btnPlay");
     const btnStepBack = document.getElementById("btnStepBack");
@@ -703,6 +1188,17 @@
       updateTrafficStyles();
       renderIncidentMarkers();
       renderIncidentList();
+
+      // If corridor is on, recompute ETA display (demo)
+      if(corridorState.on && corridorState.route){
+        const baseMin = secToMin(corridorState.route.duration_s);
+        const emgS = estimateEmergencyETA(corridorState.route.duration_s);
+        const emgMin = secToMin(emgS);
+        emgEta.textContent = `${emgMin} min (vs ${baseMin} min)`;
+        corridorState.etaText = `${emgMin} min`;
+      }
+
+      updateKPICards();
     }
 
     function play(){
@@ -733,12 +1229,13 @@
       .then(()=>{
         renderIncidentMarkers();
         renderIncidentList();
+        updateKPICards();
       })
       .catch(()=>{
         document.getElementById("snapStatus").textContent = "Error OSRM: usando fallback (líneas simples).";
-        // still show something
         renderIncidentMarkers();
         renderIncidentList();
+        updateKPICards();
       });
   </script>
 </body>
