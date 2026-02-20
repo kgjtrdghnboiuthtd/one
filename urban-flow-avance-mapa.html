@@ -9,12 +9,9 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     :root{
-      --bg:#0b1020;
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.72);
       --line:rgba(255,255,255,.14);
-      --card:rgba(255,255,255,.05);
-      --card2:rgba(255,255,255,.07);
       --shadow: 0 22px 70px rgba(0,0,0,.45);
       --radius: 18px;
       --accent:#67e8f9;
@@ -78,14 +75,7 @@
     .nav-links a:hover{border-color:var(--line);color:var(--text);background:rgba(255,255,255,.04)}
 
     .wrap{max-width:1280px;margin:0 auto;padding:18px 16px 70px}
-    .top{
-      display:grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap:14px;
-      align-items:stretch;
-      margin-top:14px;
-    }
-    @media(max-width:1020px){.top{grid-template-columns:1fr}}
+
     .panel{
       border:1px solid var(--line);
       background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
@@ -104,72 +94,26 @@
     }
     .panel > *{position:relative}
 
-    .kicker{
-      display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap
+    .section-title{
+      display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+      margin:0 0 10px;
     }
-    .kicker .tag{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:8px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.04);
-      color:var(--muted);
-      font-size:12px;
-    }
-    .kicker .tag b{color:var(--text)}
-    .title{margin:10px 0 0;font-size:18px;letter-spacing:-.2px}
-    .sub{margin:6px 0 0;color:var(--muted);font-size:12.8px;line-height:1.55}
+    .section-title h2{margin:0;font-size:16px;letter-spacing:-.2px}
+    .section-title span{color:var(--muted);font-size:12.2px}
 
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(12,1fr);
-      gap:12px;
-      margin-top:12px;
-    }
-    .card{
-      grid-column:span 4;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.04);
-      border-radius:16px;
-      padding:12px;
-    }
-    @media(max-width:1020px){.card{grid-column:span 12}}
-    .card h3{margin:0;font-size:12.8px}
-    .card p{margin:6px 0 0;color:var(--muted);font-size:12.3px;line-height:1.55}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(255,255,255,.03);
-      color:var(--muted);
-      font-size:12px;
-    }
-    .dot{width:9px;height:9px;border-radius:50%}
-    .dot.ok{background:var(--ok)}
-    .dot.warn{background:var(--warn)}
-    .dot.bad{background:var(--bad)}
-
-    .rightcol{display:grid;gap:12px}
-    .mini{
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.04);
-      border-radius: var(--radius);
-      padding:14px;
-    }
-    .mini h3{margin:0 0 8px;font-size:13px}
-    .mini .small{color:var(--muted);font-size:12.3px;line-height:1.55;margin:0}
-    .sep{height:1px;background:var(--line);margin:12px 0}
-
+    /* Mid layout */
     .mid{
       display:grid;
-      grid-template-columns: 1.55fr .45fr;
+      grid-template-columns: 1.45fr .55fr;
       gap:14px;
       margin-top:14px;
       align-items:stretch;
     }
     @media(max-width:1020px){.mid{grid-template-columns:1fr}}
+
     #map{
       width:100%;
-      height:560px;
+      height:600px;
       border-radius:16px;
       overflow:hidden;
       border:1px solid rgba(255,255,255,.12);
@@ -221,6 +165,7 @@
       font-weight:800;
       font-size:12.5px;
       transition:.18s ease;
+      cursor:pointer;
     }
     .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
     .btn.primary{
@@ -228,36 +173,20 @@
       background: linear-gradient(135deg, rgba(103,232,249,.95), rgba(167,139,250,.95));
       color:#071022;
     }
-    .btn.ghost{
+    .btn.ghost{background:rgba(255,255,255,.03)}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
       background:rgba(255,255,255,.03);
-    }
-
-    .section-title{
-      display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
-      margin:18px 0 10px;
-    }
-    .section-title h2{margin:0;font-size:16px;letter-spacing:-.2px}
-    .section-title span{color:var(--muted);font-size:12.2px}
-
-    .list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
-    .li{
-      display:flex;gap:10px;align-items:flex-start;
-      padding:12px 12px;border-radius:16px;
-      border:1px solid rgba(255,255,255,.10);
-      background:rgba(255,255,255,.03);
-    }
-    .li b{display:block;font-size:12.8px;margin-bottom:2px}
-    .li div{color:var(--muted);font-size:12.3px;line-height:1.55}
-
-    .footer{
-      margin-top:18px;
       color:var(--muted);
-      font-size:12.2px;
-      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
-      border-top:1px solid var(--line);
-      padding-top:14px;
+      font-size:12px;
     }
-    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .dot{width:9px;height:9px;border-radius:50%}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .sep{height:1px;background:var(--line);margin:12px 0}
     .notice{color:var(--muted);font-size:12.2px;line-height:1.55;margin:0}
     .em{color:rgba(255,255,255,.86);font-weight:800}
     .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
@@ -273,64 +202,76 @@
     .t-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
     .t-top .left{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .t-top .stamp{color:var(--muted);font-size:12.2px}
-    .slider{
-      width:100%;
-      margin-top:10px;
-      accent-color: var(--accent);
-    }
+    .slider{width:100%;margin-top:10px;accent-color: var(--accent);}
 
-    /* Big benefit cards */
-    .benefit-grid{
-      display:grid;
-      grid-template-columns:repeat(12,1fr);
-      gap:12px;
-      margin-top:12px;
-    }
-    .benefit{
-      grid-column:span 6;
+    /* Incidents side */
+    .inc-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .inc-header h4{margin:0;font-size:12.8px}
+    .search{
+      width:100%;
       border:1px solid rgba(255,255,255,.14);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border-radius: 20px;
-      padding:16px;
-      position:relative;
-      overflow:hidden;
-    }
-    @media(max-width:1020px){.benefit{grid-column:span 12}}
-    .benefit:before{
-      content:"";
-      position:absolute;inset:-1px;
-      background:
-        radial-gradient(700px 220px at 15% 0%, rgba(103,232,249,.14), transparent 55%),
-        radial-gradient(700px 220px at 85% 0%, rgba(167,139,250,.12), transparent 55%);
-      opacity:.9;
-      pointer-events:none;
-    }
-    .benefit > *{position:relative}
-    .b-head{display:flex;gap:12px;align-items:flex-start}
-    .icon{
-      width:42px;height:42px;border-radius:16px;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.14);
-      display:flex;align-items:center;justify-content:center;
-      flex:0 0 auto;
-      box-shadow: 0 18px 40px rgba(0,0,0,.25);
-    }
-    .b-title{margin:0;font-size:14px;letter-spacing:-.2px}
-    .b-sub{margin:6px 0 0;color:var(--muted);font-size:12.6px;line-height:1.55}
-    .b-metrics{
-      margin-top:12px;
-      display:flex;gap:10px;flex-wrap:wrap;
-    }
-    .metric{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.03);
+      background:rgba(255,255,255,.03);
       border-radius:14px;
       padding:10px 12px;
-      min-width: 160px;
+      color:var(--text);
+      outline:none;
+      font-size:12.5px;
     }
-    .metric .n{font-size:16px;font-weight:900;letter-spacing:-.2px}
-    .metric .l{margin-top:4px;color:var(--muted);font-size:12.2px}
-    .hint{margin-top:10px;color:var(--muted);font-size:12.2px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .chip{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:999px;
+      padding:7px 10px;
+      font-size:12px;
+      color:var(--muted);
+      cursor:pointer;
+      user-select:none;
+      transition:.18s ease;
+    }
+    .chip.active{border-color:rgba(103,232,249,.45); background:rgba(103,232,249,.12); color:rgba(255,255,255,.86)}
+    .inc-list{
+      margin-top:10px;
+      display:grid;
+      gap:10px;
+      max-height: 420px;
+      overflow:auto;
+      padding-right:6px;
+    }
+    .inc{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:16px;
+      padding:12px;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .inc:hover{transform:translateY(-1px); background:rgba(255,255,255,.04)}
+    .inc .toprow{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .inc .type{font-weight:850;font-size:12.8px;letter-spacing:-.15px}
+    .inc .meta{color:var(--muted);font-size:12.2px;margin-top:6px;line-height:1.45}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .legend{
+      display:flex;gap:8px;flex-wrap:wrap;margin-top:10px
+    }
+
+    .footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12.2px;
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      border-top:1px solid var(--line);
+      padding-top:14px;
+    }
   </style>
 </head>
 
@@ -339,431 +280,148 @@
     <div class="nav-inner">
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
-        <h1>Urban Flow · Estado de avance & mapa operativo — Lima</h1>
+        <h1>Urban Flow · Mapa operativo — Lima (demo)</h1>
       </div>
       <div class="nav-links">
         <a href="#mapa">Mapa</a>
-        <a href="#avance">Avance</a>
-        <a href="#waze">Waze</a>
-        <a href="#ciudades">Ciudades + resultados</a>
       </div>
     </div>
   </div>
 
   <div class="wrap">
-    <!-- TOP: Estado -->
-    <div class="top">
-      <div class="panel" id="avance">
-        <div class="kicker">
-          <span class="tag"><b>Fase</b>: Datos → Simulación → Piloto supervisado</span>
-          <span class="tag"><b>Uso</b>: interno (reunión institucional)</span>
-        </div>
-        <div class="title">Estado de avance (visión ejecutiva)</div>
-        <p class="sub">
-          Tablero con mapa operativo (OSM) + capas de congestión “snap to road” (OSRM) y una <span class="em">timeline</span>
-          para visualizar el histórico (base para entrenar/calibrar modelos).
-        </p>
+    <div class="panel" id="mapa">
+      <div class="section-title">
+        <h2>Mapa operativo (Lima)</h2>
+        <span>~15 rutas históricas · snap-to-road · timeline · incidentes</span>
+      </div>
 
-        <div class="grid">
-          <div class="card">
-            <span class="pill"><span class="dot ok"></span> Módulo 1: Datos</span>
-            <h3 style="margin-top:10px">Ingesta & normalización</h3>
-            <p>Modelo de datos listo para incidentes, cierres y velocidad agregada (por proveedor autorizado).</p>
-          </div>
-          <div class="card">
-            <span class="pill"><span class="dot warn"></span> Módulo 2: Simulación</span>
-            <h3 style="margin-top:10px">Gemelo digital (piloto)</h3>
-            <p>Requiere definir distrito/corredor y fuentes oficiales para calibrar escenarios (baseline → simulación).</p>
-          </div>
-          <div class="card">
-            <span class="pill"><span class="dot warn"></span> Módulo 3: Piloto</span>
-            <h3 style="margin-top:10px">Emergencias (onda verde)</h3>
-            <p>Diseño “supervisado + fail-safe”. Necesita validación operativa y marco de seguridad.</p>
-          </div>
-        </div>
+      <div class="mid">
+        <!-- LEFT: MAP + TIMELINE -->
+        <div>
+          <div id="map" aria-label="Mapa de tráfico y eventos"></div>
 
-        <div class="sep"></div>
-
-        <div class="grid">
-          <div class="card" style="grid-column:span 6">
-            <h3>Fuentes de datos (previstas)</h3>
-            <p>
-              • OpenStreetMap (base cartográfica) ·
-              • Feeds institucionales (cierres/obras/eventos) ·
-              • Velocidades agregadas (si se habilita proveedor) ·
-              • Waze for Cities (si hay autorización).
-            </p>
-          </div>
-          <div class="card" style="grid-column:span 6">
-            <h3>Gobernanza / seguridad</h3>
-            <p>
-              Enfoque recomendado: asistencia a decisión + simulación antes de intervenir semáforos.
-              Logs, auditoría y reversión a plan estándar como requisito.
+          <div class="timeline" aria-label="Timeline de congestión">
+            <div class="t-top">
+              <div class="left">
+                <button id="btnPlay" class="btn primary" type="button">▶ Reproducir</button>
+                <button id="btnStepBack" class="btn ghost" type="button">⟵</button>
+                <button id="btnStepFwd" class="btn ghost" type="button">⟶</button>
+                <span class="pill"><span class="dot ok"></span> Histórico (demo)</span>
+              </div>
+              <div class="stamp">Tiempo: <span id="tLabel" class="mono">—</span></div>
+            </div>
+            <input id="tSlider" class="slider" type="range" min="0" max="11" step="1" value="0" />
+            <div class="legend">
+              <span class="badge"><span class="dot bad"></span> Alta</span>
+              <span class="badge"><span class="dot warn"></span> Media</span>
+              <span class="badge"><span class="dot ok"></span> Baja</span>
+              <span class="badge">Rutas: <b id="routeCount">—</b></span>
+              <span class="badge">Incidentes visibles: <b id="incCount">—</b></span>
+            </div>
+            <div class="sep"></div>
+            <p class="notice">
+              En producción, la “timeline” se alimenta de histórico real (por hora/día) y es base para calibración del modelo y simulación.
             </p>
           </div>
         </div>
 
-        <div class="sep"></div>
+        <!-- RIGHT: INCIDENTS + CONTROLS -->
+        <div class="controls">
+          <div class="control">
+            <h4>Capas</h4>
+            <div class="row">
+              <label><input id="tgTraffic" class="toggle" type="checkbox" checked /> Congestión (snap-to-road)</label>
+            </div>
+            <div class="row">
+              <label><input id="tgIncidents" class="toggle" type="checkbox" checked /> Incidentes</label>
+            </div>
+            <div class="row">
+              <label><input id="tgClosures" class="toggle" type="checkbox" /> Cierres / obras</label>
+            </div>
+            <div class="sep"></div>
+            <p id="snapStatus" class="notice">Inicializando…</p>
+          </div>
 
-        <p class="notice">
-          <span class="em">Nota técnica:</span> la capa “congestión” se genera como geometría de ruta real (snap-to-road) usando OSRM.
-          Si OSRM no está disponible, cae en modo fallback (líneas simples).
-        </p>
+          <div class="control">
+            <div class="inc-header">
+              <h4>Incidentes (vista lateral)</h4>
+              <span class="pill"><span class="dot warn"></span> Live-like</span>
+            </div>
+
+            <input id="q" class="search" placeholder="Buscar (ej.: accidente, obra, vía, distrito)…" />
+
+            <div class="chips">
+              <div class="chip active" data-filter="all">Todos</div>
+              <div class="chip" data-filter="Alta">Alta</div>
+              <div class="chip" data-filter="Media">Media</div>
+              <div class="chip" data-filter="Baja">Baja</div>
+              <div class="chip" data-filter="Cierre">Cierres</div>
+            </div>
+
+            <div id="incList" class="inc-list" aria-label="Lista de incidentes"></div>
+
+            <div class="sep"></div>
+            <p class="notice">
+              Clic en un incidente: zoom + popup + highlight. La lista se sincroniza con la timeline.
+            </p>
+          </div>
+
+          <div class="control">
+            <h4>Vista rápida</h4>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn" onclick="flyTo('miraflores')">Miraflores</button>
+              <button class="btn" onclick="flyTo('centro')">Centro</button>
+              <button class="btn" onclick="flyTo('aeropuerto')">Aeropuerto</button>
+            </div>
+            <div class="sep"></div>
+            <p class="notice">Ajusta presets según distrito piloto definido con el Ministerio.</p>
+          </div>
+        </div>
       </div>
 
-      <div class="rightcol">
-        <div class="mini">
-          <h3>Acciones rápidas</h3>
-          <p class="small">
-            • <span class="kbd">Imprimir</span> como PDF para comité<br/>
-            • Timeline para “replay” del tráfico<br/>
-            • Mostrar “Ciudades + resultados” (cards grandes)
-          </p>
-          <div class="sep"></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <a class="btn primary" href="#" onclick="window.print(); return false;">Imprimir / PDF</a>
-            <a class="btn" href="#ciudades">Ver resultados</a>
-          </div>
-        </div>
-
-        <div class="mini" id="waze">
-          <h3>Modo Waze (previsto)</h3>
-          <p class="notice">
-            Waze for Cities permite a entidades públicas monitorear incidentes y compartir cierres/obras con Waze/Google Maps.
-            Activación sujeta a autorización/partenariado.
-          </p>
-          <div class="sep"></div>
-          <p class="small mono">Estado: <b>EN ESPERA</b> (solicitud institucional)</p>
-        </div>
-
-        <div class="mini">
-          <h3>Compatibilidad Google Maps</h3>
-          <p class="small">
-            La UI está preparada para alternar base map. Por seguridad, no se incluye API key aquí.
-          </p>
-          <div class="sep"></div>
-          <p class="small mono">API Key: <b>no incluida</b></p>
-        </div>
+      <div class="footer">
+        <span>© <span id="y"></span> · Urban Flow (uso interno) · OSM + OSRM (demo)</span>
+        <span class="pill"><span class="dot ok"></span> Fallback seguro: OSM</span>
       </div>
-    </div>
-
-    <!-- MID: Map + Controls -->
-    <div class="mid" id="mapa">
-      <div class="panel">
-        <div class="section-title">
-          <h2>Mapa operativo (Lima)</h2>
-          <span>OSM listo · rutas “snap” a calles · timeline</span>
-        </div>
-
-        <div id="map" aria-label="Mapa de tráfico y eventos"></div>
-
-        <!-- Timeline -->
-        <div class="timeline" aria-label="Timeline de congestión">
-          <div class="t-top">
-            <div class="left">
-              <button id="btnPlay" class="btn primary" type="button">▶ Reproducir</button>
-              <button id="btnStepBack" class="btn ghost" type="button">⟵</button>
-              <button id="btnStepFwd" class="btn ghost" type="button">⟶</button>
-              <span class="pill"><span class="dot ok"></span> Histórico (demo)</span>
-            </div>
-            <div class="stamp">Tiempo: <span id="tLabel" class="mono">—</span></div>
-          </div>
-          <input id="tSlider" class="slider" type="range" min="0" max="9" step="1" value="0" />
-          <p class="notice" style="margin-top:10px">
-            Este “replay” sirve como prueba visual de un histórico: es lo que luego alimenta la calibración del modelo (baseline) y la simulación.
-          </p>
-        </div>
-
-        <div class="sep"></div>
-        <p class="notice">
-          Demo interna: congestión/incident layers son mock. Se sustituyen por datos reales cuando se conecten fuentes institucionales o proveedores autorizados.
-        </p>
-      </div>
-
-      <div class="controls">
-        <div class="control">
-          <h4>Capas (demo)</h4>
-
-          <div class="row">
-            <label><input id="tgTraffic" class="toggle" type="checkbox" checked /> Congestión (snap-to-road)</label>
-          </div>
-
-          <div class="row">
-            <label><input id="tgIncidents" class="toggle" type="checkbox" checked /> Incidentes (mock)</label>
-          </div>
-
-          <div class="row">
-            <label><input id="tgClosures" class="toggle" type="checkbox" /> Cierres / obras (mock)</label>
-          </div>
-        </div>
-
-        <div class="control">
-          <h4>Base map</h4>
-
-          <div class="row">
-            <label><input id="bmOSM" class="toggle" type="checkbox" checked /> OpenStreetMap (Leaflet)</label>
-          </div>
-
-          <div class="row">
-            <label title="Requiere API Key"><input id="bmGoogle" class="toggle" type="checkbox" /> Google Maps (requiere key)</label>
-          </div>
-
-          <div class="row">
-            <label title="Disponible con autorización / Waze for Cities"><input id="bmWaze" class="toggle" type="checkbox" /> Waze (previsto / autorización)</label>
-          </div>
-
-          <div class="sep"></div>
-          <p class="notice">
-            Nota: Google/Waze no se cargan por defecto (key/permiso). OSM queda como fallback seguro.
-          </p>
-        </div>
-
-        <div class="control">
-          <h4>Vista rápida</h4>
-          <div style="display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn" onclick="flyTo('miraflores')">Miraflores</button>
-            <button class="btn" onclick="flyTo('centro')">Centro</button>
-            <button class="btn" onclick="flyTo('aeropuerto')">Aeropuerto</button>
-          </div>
-          <div class="sep"></div>
-          <p class="notice">
-            Ajusta estos presets según el distrito piloto definido con el Ministerio.
-          </p>
-        </div>
-
-        <div class="control">
-          <h4>Estado de “snap-to-road”</h4>
-          <p id="snapStatus" class="notice">Inicializando…</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Ciudades + resultados (bigger focus) -->
-    <section id="ciudades">
-      <div class="panel">
-        <div class="section-title">
-          <h2>Ciudades que ya lo hacen + resultados (referencias)</h2>
-          <span>Bloques reforzados + iconos</span>
-        </div>
-
-        <div class="benefit-grid">
-          <div class="benefit">
-            <div class="b-head">
-              <div class="icon" aria-hidden="true">
-                <!-- city icon -->
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 21V9l8-4 8 4v12" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/>
-                  <path d="M9 21V12h6v9" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="b-title">Londres (TfL) — colaboración de datos (Waze for Cities)</h3>
-                <p class="b-sub">
-                  Referencia institucional pública: participación en programa de intercambio de información de tráfico/incidentes para mejorar coordinación y visibilidad.
-                </p>
-              </div>
-            </div>
-            <div class="b-metrics">
-              <div class="metric">
-                <div class="n">Datos + incidentes</div>
-                <div class="l">Visibilidad operativa</div>
-              </div>
-              <div class="metric">
-                <div class="n">Coordinación</div>
-                <div class="l">Obras / eventos / cierres</div>
-              </div>
-            </div>
-            <div class="hint">Uso aquí: demostrar viabilidad de colaboración pública + enfoque “bajo riesgo”.</div>
-          </div>
-
-          <div class="benefit">
-            <div class="b-head">
-              <div class="icon" aria-hidden="true">
-                <!-- building icon -->
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M6 22V3h12v19" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linejoin="round"/>
-                  <path d="M9 7h1M9 11h1M9 15h1M14 7h1M14 11h1M14 15h1" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="b-title">Paris — participación pública (Waze for Cities)</h3>
-                <p class="b-sub">
-                  Existencia de deliberación pública relativa a la participación. Sirve como precedente de adopción institucional.
-                </p>
-              </div>
-            </div>
-            <div class="b-metrics">
-              <div class="metric">
-                <div class="n">Precedente</div>
-                <div class="l">Marco público/municipal</div>
-              </div>
-              <div class="metric">
-                <div class="n">Datos compartidos</div>
-                <div class="l">Cierres / eventos</div>
-              </div>
-            </div>
-            <div class="hint">Uso aquí: “esto ya se hace en capitales”, sin prometer cifras para Lima.</div>
-          </div>
-
-          <div class="benefit">
-            <div class="b-head">
-              <div class="icon" aria-hidden="true">
-                <!-- traffic light icon -->
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M10 2h4v20h-4z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                  <circle cx="12" cy="6" r="1.8" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                  <circle cx="12" cy="12" r="1.8" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                  <circle cx="12" cy="18" r="1.8" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="b-title">Optimización “clásica” (sin IA generativa): SCOOT / SCATS</h3>
-                <p class="b-sub">
-                  Sistemas adaptativos de semáforos y control de tráfico con beneficios medibles (según material público). Sirve para mostrar que incluso sin “IA”, la optimización aporta resultados.
-                </p>
-              </div>
-            </div>
-            <div class="b-metrics">
-              <div class="metric">
-                <div class="n">~12%</div>
-                <div class="l">↓ demora (SCOOT, promedio donde instalado)</div>
-              </div>
-              <div class="metric">
-                <div class="n">~8%</div>
-                <div class="l">↓ paradas (SCOOT)</div>
-              </div>
-              <div class="metric">
-                <div class="n">28% / 25%</div>
-                <div class="l">↓ tiempo / ↓ paradas (SCATS, brochure)</div>
-              </div>
-            </div>
-            <div class="hint">Urban Flow se posiciona como: datos + histórico + simulación + piloto supervisado.</div>
-          </div>
-
-          <div class="benefit">
-            <div class="b-head">
-              <div class="icon" aria-hidden="true">
-                <!-- globe icon -->
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                  <path d="M2 12h20" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                  <path d="M12 2c3 3 3 17 0 20-3-3-3-17 0-20Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
-                </svg>
-              </div>
-              <div>
-                <h3 class="b-title">Escala de programas de datos públicos</h3>
-                <p class="b-sub">
-                  Programas tipo “for Cities” se plantean como colaboración a gran escala con múltiples ciudades. Útil para reforzar viabilidad institucional.
-                </p>
-              </div>
-            </div>
-            <div class="b-metrics">
-              <div class="metric">
-                <div class="n">Escalable</div>
-                <div class="l">Modelo multi-ciudad</div>
-              </div>
-              <div class="metric">
-                <div class="n">Bajo riesgo</div>
-                <div class="l">Primero datos, luego piloto</div>
-              </div>
-            </div>
-            <div class="hint">Mensaje: “empezar pequeño, medir, escalar”.</div>
-          </div>
-        </div>
-
-        <div class="sep"></div>
-        <p class="notice">
-          <b>Importante (tono institucional):</b> usar estas referencias como “prueba de viabilidad” y “beneficios medibles”,
-          sin prometer el mismo impacto para Lima hasta tener baseline + piloto.
-        </p>
-      </div>
-    </section>
-
-    <div class="footer">
-      <span>© <span id="y"></span> · Urban Flow (uso interno) · OSM listo · Snap-to-road + timeline</span>
-      <span class="pill"><span class="dot ok"></span> Fallback seguro: OSM</span>
     </div>
   </div>
 
-  <!-- Leaflet -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
     document.getElementById("y").textContent = new Date().getFullYear();
 
     // ====== CONFIG ======
-    const YOUR_GOOGLE_MAPS_API_KEY = ""; // (opcional) no usada aquí
-
-    // Centro inicial (Lima)
     const LIMA = { lat: -12.0464, lng: -77.0428, z: 12 };
-
-    // OSRM public endpoint (snap-to-road via route)
-    // Nota: es un endpoint público. Para producción, lo ideal es usar tu propio OSRM o proveedor.
     const OSRM_ROUTE = "https://router.project-osrm.org/route/v1/driving/";
 
-    // ====== Map init (OSM) ======
+    // ====== Map init ======
     const map = L.map('map', { zoomControl: true }).setView([LIMA.lat, LIMA.lng], LIMA.z);
-
     const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
-    // Base layers (placeholders)
-    let googleLayer = null;
-    let wazeLayer = null;
 
     // ====== Layers ======
     const trafficLayer = L.layerGroup().addTo(map);
     const incidentsLayer = L.layerGroup().addTo(map);
     const closuresLayer = L.layerGroup(); // off by default
 
-    // ====== Timeline model (demo) ======
-    // 10 pasos temporales (replay). Ajusta a 24h/7d/etc. cuando tengas datos reales.
-    const timeline = Array.from({length: 10}).map((_,i)=>{
-      const h = (8 + i) % 24;
+    // ====== Timeline ======
+    // 12 pasos (más realista). Puedes cambiar a 24 o 48 sin problema.
+    const timeline = Array.from({length: 12}).map((_,i)=>{
+      const h = (7 + i) % 24;
       return `2026-02-19 ${String(h).padStart(2,'0')}:00`;
     });
+    const tSlider = document.getElementById("tSlider");
+    tSlider.max = String(timeline.length - 1);
 
-    // Segment definitions (anchors). The route geometry will be snapped via OSRM.
-    // Each segment has severity per timeline step (low/med/high)
-    const segmentDefs = [
-      {
-        id: "segA",
-        name: "Eje A (mock)",
-        anchors: [
-          [-12.089, -77.050],
-          [-12.080, -77.038],
-          [-12.070, -77.030],
-        ],
-        levels: ["med","high","high","med","med","low","low","med","high","high"]
-      },
-      {
-        id: "segB",
-        name: "Eje B (mock)",
-        anchors: [
-          [-12.060, -77.080],
-          [-12.050, -77.070],
-          [-12.042, -77.060],
-        ],
-        levels: ["low","low","med","med","med","low","low","low","med","med"]
-      },
-      {
-        id: "segC",
-        name: "Eje C (mock)",
-        anchors: [
-          [-12.030, -77.045],
-          [-12.020, -77.040],
-          [-12.010, -77.036],
-        ],
-        levels: ["low","med","med","low","low","low","med","med","low","low"]
-      }
-    ];
+    let tIndex = 0;
+    function updateTimelineLabel(){
+      document.getElementById("tLabel").textContent = timeline[tIndex] ?? "—";
+    }
 
-    // Will store snapped polylines
-    const segmentLines = new Map(); // id -> L.Polyline
-
-    // ====== Styling ======
+    // ====== Severity styles ======
     function styleBy(level){
       const color = level==="high" ? "#fb7185" : (level==="med" ? "#fbbf24" : "#34d399");
       const weight = level==="high" ? 7 : (level==="med" ? 6 : 5);
@@ -772,55 +430,50 @@
 
     // ====== OSRM snap-to-road ======
     async function snapRouteOSRM(anchors){
-      // Build coords string "lon,lat;lon,lat;..."
       const coords = anchors.map(([lat,lng]) => `${lng},${lat}`).join(";");
       const url = `${OSRM_ROUTE}${coords}?overview=full&geometries=geojson&steps=false`;
       const res = await fetch(url);
       if(!res.ok) throw new Error(`OSRM HTTP ${res.status}`);
       const json = await res.json();
       const route = json?.routes?.[0];
-      const geom = route?.geometry?.coordinates; // [lon,lat]
+      const geom = route?.geometry?.coordinates;
       if(!geom || !geom.length) throw new Error("OSRM no geometry");
-      // Convert to Leaflet latlngs
       return geom.map(([lon,lat]) => [lat,lon]);
     }
 
-    function addIncidentsMock(){
-      incidentsLayer.clearLayers();
-      const incidents = [
-        { lat:-12.076, lng:-77.037, type:"Accidente (mock)", sev:"Alta", note:"Posible carril bloqueado" },
-        { lat:-12.048, lng:-77.060, type:"Vehículo detenido (mock)", sev:"Media", note:"Requiere verificación" },
-        { lat:-12.017, lng:-77.043, type:"Obstáculo (mock)", sev:"Baja", note:"Reporte ciudadano" }
-      ];
-      incidents.forEach(i=>{
-        const color = i.sev==="Alta" ? "#fb7185" : (i.sev==="Media" ? "#fbbf24" : "#34d399");
-        const marker = L.circleMarker([i.lat,i.lng], {
-          radius:9, color:color, fillColor:color, fillOpacity:0.85, weight:2
-        }).bindPopup(
-          `<b>Incidente</b><br/>${i.type}<br/><span class="mono">Severidad:</span> ${i.sev}<br/>${i.note}`
-        );
-        incidentsLayer.addLayer(marker);
+    // ====== Build ~15 traffic segments (mock but realistic density) ======
+    // Anchors are around Lima (approx). In production these come from real corridors.
+    function mkLevels(seed){
+      // deterministic-ish pattern
+      const base = ["low","low","med","med","high","high","med","low","low","med","high","med"];
+      return base.map((v, i)=>{
+        const n = (seed * 7 + i * 3) % 10;
+        if(n < 2) return "high";
+        if(n < 5) return "med";
+        return v;
       });
     }
 
-    function addClosuresMock(){
-      closuresLayer.clearLayers();
-      const area = L.polygon(
-        [[-12.062,-77.055],[-12.056,-77.048],[-12.050,-77.052],[-12.052,-77.060]],
-        { color:"#a78bfa", fillColor:"#a78bfa", fillOpacity:0.18, weight:2 }
-      ).bindPopup("<b>Cierre / Obra (mock)</b><br/>Zona afectada — desvío sugerido");
-      closuresLayer.addLayer(area);
-    }
+    const segmentDefs = [
+      { id:"s1",  name:"Corredor 1 (mock)",  anchors:[[-12.105,-77.060],[-12.095,-77.045],[-12.085,-77.035]], levels:mkLevels(1) },
+      { id:"s2",  name:"Corredor 2 (mock)",  anchors:[[-12.090,-77.080],[-12.080,-77.067],[-12.070,-77.055]], levels:mkLevels(2) },
+      { id:"s3",  name:"Corredor 3 (mock)",  anchors:[[-12.070,-77.090],[-12.060,-77.075],[-12.050,-77.060]], levels:mkLevels(3) },
+      { id:"s4",  name:"Corredor 4 (mock)",  anchors:[[-12.050,-77.085],[-12.045,-77.070],[-12.040,-77.055]], levels:mkLevels(4) },
+      { id:"s5",  name:"Corredor 5 (mock)",  anchors:[[-12.040,-77.040],[-12.035,-77.050],[-12.030,-77.060]], levels:mkLevels(5) },
+      { id:"s6",  name:"Corredor 6 (mock)",  anchors:[[-12.030,-77.030],[-12.020,-77.040],[-12.010,-77.050]], levels:mkLevels(6) },
+      { id:"s7",  name:"Corredor 7 (mock)",  anchors:[[-12.060,-77.040],[-12.055,-77.028],[-12.050,-77.020]], levels:mkLevels(7) },
+      { id:"s8",  name:"Corredor 8 (mock)",  anchors:[[-12.075,-77.030],[-12.065,-77.020],[-12.055,-77.015]], levels:mkLevels(8) },
+      { id:"s9",  name:"Corredor 9 (mock)",  anchors:[[-12.090,-77.035],[-12.080,-77.025],[-12.070,-77.020]], levels:mkLevels(9) },
+      { id:"s10", name:"Corredor 10 (mock)", anchors:[[-12.100,-77.045],[-12.090,-77.040],[-12.080,-77.035]], levels:mkLevels(10) },
+      { id:"s11", name:"Corredor 11 (mock)", anchors:[[-12.020,-77.090],[-12.020,-77.070],[-12.020,-77.050]], levels:mkLevels(11) },
+      { id:"s12", name:"Corredor 12 (mock)", anchors:[[-12.035,-77.100],[-12.030,-77.085],[-12.025,-77.070]], levels:mkLevels(12) },
+      { id:"s13", name:"Corredor 13 (mock)", anchors:[[-12.055,-77.110],[-12.050,-77.095],[-12.045,-77.080]], levels:mkLevels(13) },
+      { id:"s14", name:"Corredor 14 (mock)", anchors:[[-12.080,-77.110],[-12.070,-77.095],[-12.060,-77.080]], levels:mkLevels(14) },
+      { id:"s15", name:"Corredor 15 (mock)", anchors:[[-12.110,-77.095],[-12.100,-77.085],[-12.090,-77.075]], levels:mkLevels(15) }
+    ];
 
-    addIncidentsMock();
-    addClosuresMock();
-
-    // ====== Traffic render ======
-    let tIndex = 0;
-
-    function updateTimelineLabel(){
-      document.getElementById("tLabel").textContent = timeline[tIndex] ?? "—";
-    }
+    const segmentLines = new Map(); // id -> polyline
+    let snappedOK = 0;
 
     function updateTrafficStyles(){
       segmentDefs.forEach(def=>{
@@ -837,19 +490,18 @@
     async function buildTrafficLayer(){
       trafficLayer.clearLayers();
       segmentLines.clear();
+      snappedOK = 0;
 
       const status = document.getElementById("snapStatus");
       status.textContent = "Generando rutas sobre calles (OSRM)…";
 
-      let snappedOK = 0;
       for (const def of segmentDefs){
         let latlngs = null;
         try{
           latlngs = await snapRouteOSRM(def.anchors);
           snappedOK += 1;
-        }catch(err){
-          // fallback to anchors as straight segments
-          latlngs = def.anchors;
+        }catch(e){
+          latlngs = def.anchors; // fallback
         }
 
         const lvl = def.levels[tIndex] ?? "low";
@@ -862,16 +514,160 @@
         segmentLines.set(def.id, line);
       }
 
+      document.getElementById("routeCount").textContent = String(segmentDefs.length);
+
       if(snappedOK === segmentDefs.length){
         status.textContent = `OK: rutas alineadas a calles (OSRM) · ${snappedOK}/${segmentDefs.length}`;
       }else{
-        status.textContent = `Parcial: OSRM ${snappedOK}/${segmentDefs.length} · fallback en algunas rutas (líneas simples)`;
+        status.textContent = `Parcial: OSRM ${snappedOK}/${segmentDefs.length} · fallback en algunas rutas`;
       }
 
       updateTrafficStyles();
     }
 
-    // ====== UI toggles ======
+    // ====== Incidents model synced with timeline ======
+    // Each incident has active steps range [start,end] and severity.
+    const incidentDefs = [
+      { id:"i1",  type:"Accidente", sev:"Alta",   note:"Posible carril bloqueado",    lat:-12.076, lng:-77.037, start:1, end:5, tags:["accidente","vía"] },
+      { id:"i2",  type:"Vehículo detenido", sev:"Media", note:"Requiere verificación", lat:-12.048, lng:-77.060, start:0, end:3, tags:["vehículo"] },
+      { id:"i3",  type:"Obstáculo", sev:"Baja",  note:"Reporte ciudadano",            lat:-12.017, lng:-77.043, start:4, end:9, tags:["obstáculo"] },
+      { id:"i4",  type:"Cierre por obra", sev:"Media", note:"Desvío sugerido",        lat:-12.055, lng:-77.055, start:2, end:11, tags:["Cierre","obra"] },
+      { id:"i5",  type:"Evento / marcha", sev:"Alta",  note:"Alta densidad",          lat:-12.046, lng:-77.042, start:6, end:11, tags:["evento"] },
+      { id:"i6",  type:"Semáforo fuera de servicio", sev:"Media", note:"Gestión manual", lat:-12.070, lng:-77.055, start:3, end:7, tags:["semaforo"] },
+      { id:"i7",  type:"Choque menor", sev:"Baja", note:"Tránsito lento",             lat:-12.095, lng:-77.045, start:7, end:10, tags:["accidente"] },
+      { id:"i8",  type:"Cierre parcial", sev:"Media", note:"Carril reducido",         lat:-12.020, lng:-77.070, start:0, end:11, tags:["Cierre"] }
+    ];
+
+    const incidentMarkers = new Map(); // id -> marker
+    let highlightedMarker = null;
+
+    function sevColor(sev){
+      if(sev==="Alta") return "#fb7185";
+      if(sev==="Media") return "#fbbf24";
+      return "#34d399";
+    }
+
+    function isIncidentActive(inc, idx){
+      return idx >= inc.start && idx <= inc.end;
+    }
+
+    function renderIncidentMarkers(){
+      incidentsLayer.clearLayers();
+      incidentMarkers.clear();
+
+      const active = incidentDefs.filter(inc => isIncidentActive(inc, tIndex));
+      active.forEach(inc=>{
+        const color = sevColor(inc.sev);
+        const m = L.circleMarker([inc.lat, inc.lng], {
+          radius:9, color, fillColor:color, fillOpacity:0.88, weight:2
+        }).bindPopup(
+          `<b>Incidente</b><br/>${inc.type}<br/><span class="mono">Severidad:</span> ${inc.sev}<br/><span class="mono">Tiempo:</span> ${timeline[tIndex]}<br/>${inc.note}`
+        );
+        m.on("click", ()=> focusIncident(inc.id));
+        incidentsLayer.addLayer(m);
+        incidentMarkers.set(inc.id, m);
+      });
+
+      document.getElementById("incCount").textContent = String(active.length);
+    }
+
+    function focusIncident(id){
+      const inc = incidentDefs.find(x=>x.id===id);
+      const m = incidentMarkers.get(id);
+      if(!inc || !m) return;
+
+      map.flyTo([inc.lat, inc.lng], Math.max(map.getZoom(), 14), { duration: 0.8 });
+      m.openPopup();
+
+      // highlight ring
+      if(highlightedMarker){
+        highlightedMarker.setStyle({ weight:2, radius:9 });
+      }
+      m.setStyle({ weight:4, radius:11 });
+      highlightedMarker = m;
+    }
+
+    // ====== Incident side list (filters + search) ======
+    const incList = document.getElementById("incList");
+    const q = document.getElementById("q");
+    let activeFilter = "all";
+
+    function matchesFilter(inc){
+      if(activeFilter==="all") return true;
+      if(activeFilter==="Cierre") return inc.tags.includes("Cierre") || inc.type.toLowerCase().includes("cierre");
+      return inc.sev === activeFilter;
+    }
+
+    function matchesQuery(inc, query){
+      if(!query) return true;
+      const s = query.toLowerCase();
+      return (
+        inc.type.toLowerCase().includes(s) ||
+        inc.note.toLowerCase().includes(s) ||
+        inc.sev.toLowerCase().includes(s) ||
+        inc.tags.some(t => String(t).toLowerCase().includes(s))
+      );
+    }
+
+    function renderIncidentList(){
+      const query = q.value.trim();
+      const active = incidentDefs
+        .filter(inc => isIncidentActive(inc, tIndex))
+        .filter(matchesFilter)
+        .filter(inc => matchesQuery(inc, query));
+
+      incList.innerHTML = "";
+      if(active.length === 0){
+        const empty = document.createElement("div");
+        empty.className = "notice";
+        empty.textContent = "Sin incidentes para este filtro en el tiempo actual.";
+        incList.appendChild(empty);
+        return;
+      }
+
+      active.forEach(inc=>{
+        const el = document.createElement("div");
+        el.className = "inc";
+        el.innerHTML = `
+          <div class="toprow">
+            <div>
+              <div class="type">${inc.type}</div>
+              <div class="meta">
+                <span class="badge"><span class="dot ${inc.sev==="Alta"?"bad":(inc.sev==="Media"?"warn":"ok")}"></span>${inc.sev}</span>
+                <span class="badge">${timeline[tIndex]}</span>
+              </div>
+            </div>
+            <span class="badge">Ver</span>
+          </div>
+          <div class="meta" style="margin-top:8px">${inc.note}</div>
+        `;
+        el.addEventListener("click", ()=> focusIncident(inc.id));
+        incList.appendChild(el);
+      });
+    }
+
+    document.querySelectorAll(".chip").forEach(ch=>{
+      ch.addEventListener("click", ()=>{
+        document.querySelectorAll(".chip").forEach(x=>x.classList.remove("active"));
+        ch.classList.add("active");
+        activeFilter = ch.dataset.filter;
+        renderIncidentList();
+      });
+    });
+    q.addEventListener("input", ()=> renderIncidentList());
+
+    // ====== Closures mock polygon (optional layer) ======
+    function addClosuresMock(){
+      closuresLayer.clearLayers();
+      const area = L.polygon(
+        [[-12.062,-77.055],[-12.056,-77.048],[-12.050,-77.052],[-12.052,-77.060]],
+        { color:"#a78bfa", fillColor:"#a78bfa", fillOpacity:0.18, weight:2 }
+      ).bindPopup("<b>Cierre / Obra (mock)</b><br/>Zona afectada — desvío sugerido");
+      closuresLayer.addLayer(area);
+    }
+    addClosuresMock();
+
+    // ====== Toggles ======
     const tgTraffic = document.getElementById("tgTraffic");
     const tgIncidents = document.getElementById("tgIncidents");
     const tgClosures = document.getElementById("tgClosures");
@@ -880,41 +676,7 @@
     tgIncidents.addEventListener("change", ()=> tgIncidents.checked ? incidentsLayer.addTo(map) : map.removeLayer(incidentsLayer));
     tgClosures.addEventListener("change", ()=> tgClosures.checked ? closuresLayer.addTo(map) : map.removeLayer(closuresLayer));
 
-    // Base map toggles (OSM always available)
-    const bmOSM = document.getElementById("bmOSM");
-    const bmGoogle = document.getElementById("bmGoogle");
-    const bmWaze = document.getElementById("bmWaze");
-
-    function resetBaseToggles(except){
-      ["bmOSM","bmGoogle","bmWaze"].forEach(id=>{
-        if(id!==except) document.getElementById(id).checked = false;
-      });
-    }
-
-    bmOSM.addEventListener("change", ()=>{
-      if(!bmOSM.checked){ bmOSM.checked = true; return; }
-      resetBaseToggles("bmOSM");
-      if(!map.hasLayer(osm)) osm.addTo(map);
-      if(googleLayer && map.hasLayer(googleLayer)) map.removeLayer(googleLayer);
-      if(wazeLayer && map.hasLayer(wazeLayer)) map.removeLayer(wazeLayer);
-    });
-
-    bmGoogle.addEventListener("change", async ()=>{
-      if(!bmGoogle.checked) return;
-      resetBaseToggles("bmGoogle");
-
-      alert("Integración Google Maps: prevista (requiere implementación aprobada + API key). Se mantiene OSM como base en esta demo.");
-      bmOSM.checked = true; bmGoogle.checked = false;
-    });
-
-    bmWaze.addEventListener("change", ()=>{
-      if(!bmWaze.checked) return;
-      resetBaseToggles("bmWaze");
-      alert("Waze: previsto vía Waze for Cities (feeds / Partner Hub). Requiere autorización institucional. Se mantiene OSM como base.");
-      bmOSM.checked = true; bmWaze.checked = false;
-    });
-
-    // Presets (ajusta según piloto)
+    // ====== Presets ======
     const presets = {
       miraflores: { lat:-12.121, lng:-77.030, z: 13 },
       centro: { lat:-12.0464, lng:-77.0428, z: 13 },
@@ -925,30 +687,22 @@
       map.flyTo([p.lat,p.lng], p.z, { duration: 0.9 });
     };
 
-    // Smooth anchors
-    document.querySelectorAll('a[href^="#"]').forEach(a=>{
-      a.addEventListener('click',(e)=>{
-        const id=a.getAttribute('href'); if(!id||id==="#") return;
-        const el=document.querySelector(id); if(!el) return;
-        e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'});
-      });
-    });
-
     // ====== Timeline controls ======
-    const tSlider = document.getElementById("tSlider");
     const btnPlay = document.getElementById("btnPlay");
     const btnStepBack = document.getElementById("btnStepBack");
     const btnStepFwd = document.getElementById("btnStepFwd");
 
     let playing = false;
     let timer = null;
-    const FPS_MS = 700; // vitesse replay (accéléré)
+    const FPS_MS = 650;
 
     function setIndex(i){
       tIndex = Math.max(0, Math.min(timeline.length - 1, i));
       tSlider.value = String(tIndex);
       updateTimelineLabel();
       updateTrafficStyles();
+      renderIncidentMarkers();
+      renderIncidentList();
     }
 
     function play(){
@@ -956,37 +710,36 @@
       playing = true;
       btnPlay.textContent = "⏸ Pausar";
       timer = setInterval(()=>{
-        if(tIndex >= timeline.length - 1){
-          // loop
-          setIndex(0);
-        }else{
-          setIndex(tIndex + 1);
-        }
+        if(tIndex >= timeline.length - 1) setIndex(0);
+        else setIndex(tIndex + 1);
       }, FPS_MS);
     }
-
     function pause(){
       playing = false;
       btnPlay.textContent = "▶ Reproducir";
       if(timer) clearInterval(timer);
       timer = null;
     }
+    btnPlay.addEventListener("click", ()=> playing ? pause() : play());
+    btnStepBack.addEventListener("click", ()=> { pause(); setIndex(tIndex - 1); });
+    btnStepFwd.addEventListener("click", ()=> { pause(); setIndex(tIndex + 1); });
+    tSlider.addEventListener("input", (e)=>{ pause(); setIndex(parseInt(e.target.value,10)); });
 
-    btnPlay.addEventListener("click", ()=>{
-      playing ? pause() : play();
-    });
-    btnStepBack.addEventListener("click", ()=> setIndex(tIndex - 1));
-    btnStepFwd.addEventListener("click", ()=> setIndex(tIndex + 1));
-    tSlider.addEventListener("input", (e)=>{
-      pause();
-      setIndex(parseInt(e.target.value, 10));
-    });
-
-    // Init
+    // ====== Init ======
     updateTimelineLabel();
-    buildTrafficLayer().catch(()=>{
-      document.getElementById("snapStatus").textContent = "Error OSRM: usando fallback (líneas simples).";
-    });
+    document.getElementById("routeCount").textContent = String(segmentDefs.length);
+
+    buildTrafficLayer()
+      .then(()=>{
+        renderIncidentMarkers();
+        renderIncidentList();
+      })
+      .catch(()=>{
+        document.getElementById("snapStatus").textContent = "Error OSRM: usando fallback (líneas simples).";
+        // still show something
+        renderIncidentMarkers();
+        renderIncidentList();
+      });
   </script>
 </body>
 </html>
