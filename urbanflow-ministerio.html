@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Urban Flow — Optimización de Tráfico & Prioridad de Emergencias (Lima)</title>
+  <meta name="description" content="Propuesta institucional: datos → simulación → piloto supervisado para Lima."/>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --card:rgba(255,255,255,.06);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.72);
+      --line:rgba(255,255,255,.14);
+      --accent:#67e8f9;
+      --accent2:#a78bfa;
+      --ok:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --shadow: 0 24px 70px rgba(0,0,0,.45);
+      --radius: 20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(103,232,249,.18), transparent 55%),
+        radial-gradient(900px 600px at 85% 30%, rgba(167,139,250,.18), transparent 55%),
+        radial-gradient(900px 700px at 50% 100%, rgba(52,211,153,.10), transparent 55%),
+        linear-gradient(180deg, #070a14 0%, #0b1020 40%, #070a14 100%);
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .wrap{max-width:1120px;margin:0 auto;padding:28px 18px 90px}
+    .nav{
+      position:sticky;top:0;z-index:10;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(7,10,20,.75), rgba(7,10,20,.38));
+      border-bottom:1px solid var(--line);
+    }
+    .nav-inner{max-width:1120px;margin:0 auto;padding:10px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(103,232,249,.9), rgba(167,139,250,.9));
+      box-shadow: 0 12px 30px rgba(103,232,249,.12);
+      position:relative;overflow:hidden;
+    }
+    .logo:after{
+      content:"";position:absolute;inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 45%);
+      transform: rotate(12deg);
+      animation: drift 8s ease-in-out infinite;
+      opacity:.6;
+    }
+    @keyframes drift{
+      0%,100%{transform:translate(0,0) rotate(12deg)}
+      50%{transform:translate(16px,-12px) rotate(12deg)}
+    }
+    .brand h1{font-size:13px;letter-spacing:.3px;margin:0;color:var(--muted);font-weight:650}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      padding:8px 10px;border-radius:999px;
+      font-size:12px;color:var(--muted);
+    }
+    .pill b{color:var(--text)}
+    .nav-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav-links a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid transparent;
+      color:var(--muted);
+      transition:.18s ease;
+      font-size:12px;
+    }
+    .nav-links a:hover{border-color:var(--line);color:var(--text);background:rgba(255,255,255,.04)}
+    .hero{padding:34px 0 10px;display:grid;grid-template-columns:1.2fr .8fr;gap:18px;align-items:stretch}
+    @media(max-width:980px){.hero{grid-template-columns:1fr;}}
+    .h-card{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:28px;
+      position:relative;
+      overflow:hidden;
+    }
+    .h-card:before{
+      content:"";position:absolute;inset:-1px;
+      background: radial-gradient(800px 220px at 20% 0%, rgba(103,232,249,.18), transparent 55%),
+                  radial-gradient(800px 220px at 80% 0%, rgba(167,139,250,.16), transparent 55%);
+      pointer-events:none;
+      opacity:.9;
+    }
+    .h-card > *{position:relative}
+    .kicker{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;color:var(--muted);
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      padding:8px 10px;border-radius:999px;
+    }
+    .title{margin:14px 0 10px;font-size:36px;line-height:1.1;letter-spacing:-.6px}
+    .subtitle{margin:0;color:var(--muted);font-size:15px;line-height:1.55;max-width:64ch}
+    .hero-cta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:12px 14px;border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      text-decoration:none;
+      font-weight:700;
+      font-size:13px;
+      transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
+    .btn.primary{
+      border-color: transparent;
+      background: linear-gradient(135deg, rgba(103,232,249,.95), rgba(167,139,250,.95));
+      color:#071022;
+    }
+    .btn.primary:hover{filter:saturate(1.05);transform:translateY(-1px)}
+    .side{display:grid;gap:12px}
+    .mini{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius: var(--radius);
+      padding:16px;
+    }
+    .mini h3{margin:0 0 8px;font-size:13px;color:var(--text)}
+    .mini p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.55}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px;margin-top:18px}
+    .card{
+      grid-column: span 4;
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
+      border-radius: var(--radius);
+      padding:18px;
+    }
+    @media(max-width:980px){.card{grid-column:span 12}}
+    .card h4{margin:0 0 8px;font-size:13px}
+    .card p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.55}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;color:var(--muted);
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+      padding:6px 10px;border-radius:999px;margin-bottom:10px
+    }
+    .badge i{display:inline-block;width:8px;height:8px;border-radius:999px;background:var(--accent)}
+    section{margin-top:26px}
+    .section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:18px 0 10px}
+    .section-title h2{margin:0;font-size:18px;letter-spacing:-.2px}
+    .section-title span{color:var(--muted);font-size:12.5px}
+    .panel{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      border-radius: var(--radius);
+      padding:18px;
+    }
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:980px){.cols{grid-template-columns:1fr}}
+    .list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+    .li{
+      display:flex;gap:10px;align-items:flex-start;
+      padding:12px 12px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+    }
+    .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .li b{display:block;font-size:13px;margin-bottom:2px}
+    .li div{color:var(--muted);font-size:12.5px;line-height:1.55}
+    .timeline{display:grid;gap:10px}
+    .step{
+      display:grid;grid-template-columns:140px 1fr;gap:12px;
+      padding:14px;border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.03);
+    }
+    .step .t{font-size:12px;color:var(--muted)}
+    .step .t b{color:var(--text)}
+    .kpis{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+    .kpi{
+      grid-column:span 3;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:18px;
+      padding:14px;
+    }
+    @media(max-width:980px){.kpi{grid-column:span 6}}
+    @media(max-width:560px){.kpi{grid-column:span 12}}
+    .kpi .n{font-size:18px;font-weight:900;letter-spacing:-.2px}
+    .kpi .l{color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.45}
+    .footer{
+      margin-top:28px;
+      display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;
+      color:var(--muted);font-size:12.5px
+    }
+    .callout{
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(103,232,249,.12), rgba(255,255,255,.03));
+      border-radius: var(--radius);
+      padding:18px;
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .callout svg{flex:0 0 auto;margin-top:2px}
+    .callout b{display:block;margin-bottom:6px}
+    .callout p{margin:0;color:var(--muted);line-height:1.55;font-size:12.8px}
+    .small{font-size:12px;color:var(--muted)}
+    .sep{height:1px;background:var(--line);margin:16px 0}
+    .tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .tag{
+      font-size:12px;color:var(--muted);
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      padding:6px 10px;border-radius:999px
+    }
+    @media print{
+      .nav{display:none}
+      body{background:#fff;color:#111}
+      .h-card,.panel,.mini,.card,.li,.step,.kpi{box-shadow:none;border-color:#ddd;background:#fff}
+      .subtitle,.mini p,.card p,.li div,.small,.section-title span,.footer{color:#333}
+      .btn{display:none}
+      .wrap{padding:0}
+    }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>Urban Flow · Propuesta institucional — Lima</h1>
+      </div>
+      <div class="nav-links">
+        <a href="#problema">Problema</a>
+        <a href="#enfoque">Enfoque</a>
+        <a href="#piloto">Piloto</a>
+        <a href="#seguridad">Seguridad</a>
+        <a href="#kpi">KPI</a>
+        <a href="#solicitud">Solicitud</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="hero">
+      <div class="h-card">
+        <div class="kicker">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V7l-8-4-8 4v5c0 6 8 10 8 10Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+            <path d="M9 12l2 2 4-5" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span><b>Progresivo</b> · Datos → Simulación → Piloto supervisado</span>
+        </div>
+
+        <h2 class="title">Optimización del tráfico y prioridad de emergencias<br/>para Lima</h2>
+        <p class="subtitle">
+          Enfoque institucional, medible y de bajo riesgo: primero <b>usar datos existentes</b>
+          para entender y predecir la congestión, luego <b>simular</b> optimizaciones, y finalmente
+          ejecutar un <b>piloto limitado</b> (supervisión humana, fail-safe) — con foco en reducir
+          el tiempo de respuesta de ambulancias y servicios de emergencia.
+        </p>
+
+        <div class="hero-cta">
+          <a class="btn primary" href="#solicitud">Iniciar un piloto (90 días) →</a>
+          <a class="btn" href="#enfoque">Ver el enfoque ↓</a>
+          <a class="btn" href="#" onclick="window.print(); return false;">Imprimir / PDF</a>
+          <span class="pill"><b>Objetivo</b>: evidencia antes de inversión</span>
+        </div>
+
+        <div class="grid" style="margin-top:18px">
+          <div class="card">
+            <div class="badge"><i></i>Valor público</div>
+            <h4>Emergencias primero</h4>
+            <p>Corredores “onda verde” para ambulancias, policía e intervenciones; optimización de ejes críticos hacia hospitales.</p>
+          </div>
+          <div class="card">
+            <div class="badge"><i style="background:var(--accent2)"></i>Bajo riesgo</div>
+            <h4>Supervisión y trazabilidad</h4>
+            <p>Recomendaciones auditables; decisión final en autoridad. Sin “autonomía” total en el inicio.</p>
+          </div>
+          <div class="card">
+            <div class="badge"><i style="background:var(--ok)"></i>Medible</div>
+            <h4>KPI concretos</h4>
+            <p>Tiempo de respuesta, velocidad promedio por corredor, congestión, calidad de datos y disponibilidad del sistema.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="side">
+        <div class="mini">
+          <h3>Qué buscamos hoy (uso interno)</h3>
+          <p><b>Aprobación de principio</b> para una fase de 90 días (datos + simulación) y definir condiciones de un piloto de emergencia.</p>
+          <div class="tagrow">
+            <span class="tag">Distrito piloto</span>
+            <span class="tag">Acceso a datos</span>
+            <span class="tag">Marco de supervisión</span>
+          </div>
+        </div>
+        <div class="mini">
+          <h3>Qué NO hacemos al inicio</h3>
+          <p>No intervenimos masivamente semáforos. No desplegamos ciudad entera. No dependemos de cámaras desde el día 1.</p>
+        </div>
+        <div class="mini">
+          <h3>Entregables (90 días)</h3>
+          <p>Dashboard + predicción, reporte institucional, simulaciones, propuesta de piloto de prioridad de emergencias.</p>
+        </div>
+      </div>
+    </div>
+
+    <section id="problema">
+      <div class="section-title">
+        <h2>Problema público y oportunidad</h2>
+        <span>Por qué ahora</span>
+      </div>
+      <div class="panel cols">
+        <div>
+          <ul class="list">
+            <li class="li"><span class="dot warn"></span><div><b>Congestión y costos</b>Tiempo perdido, productividad, contaminación, estrés urbano.</div></li>
+            <li class="li"><span class="dot bad"></span><div><b>Respuesta a emergencias</b>Cada minuto cuenta (ACV / infarto / incidentes críticos).</div></li>
+            <li class="li"><span class="dot"></span><div><b>Gestión muy humana</b>Herramientas de apoyo para equipos en calle y centro de control.</div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="callout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2v6" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M12 22v-6" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M2 12h6" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M22 12h-6" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
+            </svg>
+            <div>
+              <b>Posicionamiento</b>
+              <p>Sistema de <b>asistencia</b> (datos + IA) con escalamiento progresivo y <b>sin riesgo</b> al inicio.</p>
+              <div class="sep"></div>
+              <div class="small">Enfoque institucional: salud pública + seguridad + eficiencia urbana.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="enfoque">
+      <div class="section-title">
+        <h2>Enfoque progresivo</h2>
+        <span>Realismo antes que promesas</span>
+      </div>
+      <div class="panel">
+        <div class="timeline">
+          <div class="step">
+            <div class="t"><b>Nivel 1</b><br/>Datos & diagnóstico</div>
+            <div>
+              <b>Ingesta de datos existentes (sin cámaras al inicio)</b>
+              <div class="small">Incidentes, congestión, velocidades agregadas, ejes críticos, eventos.</div>
+              <div class="tagrow">
+                <span class="tag">Dashboard tiempo real</span>
+                <span class="tag">Detección anomalías</span>
+                <span class="tag">Predicción congestión</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="t"><b>Nivel 2</b><br/>Simulación</div>
+            <div>
+              <b>Gemelo digital (distrito piloto) para probar estrategias</b>
+              <div class="small">Planes semafóricos, onda verde, desvíos, prioridad bus/emergencias.</div>
+              <div class="tagrow">
+                <span class="tag">Digital twin</span>
+                <span class="tag">Escenarios “what-if”</span>
+                <span class="tag">Reporte institucional</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="t"><b>Nivel 3</b><br/>Piloto</div>
+            <div>
+              <b>Piloto limitado y supervisado (5–10 intersecciones)</b>
+              <div class="small">Apoyo a decisión + supervisión humana + logs + fail-safe + “override”.</div>
+              <div class="tagrow">
+                <span class="tag">Supervisión</span>
+                <span class="tag">Fail-safe</span>
+                <span class="tag">Prioridad emergencias</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="piloto">
+      <div class="section-title">
+        <h2>Piloto propuesto</h2>
+        <span>90 días · bajo riesgo · evidencia medible</span>
+      </div>
+      <div class="panel cols">
+        <div>
+          <ul class="list">
+            <li class="li"><span class="dot"></span><div><b>Definir 1 distrito</b>Con el Ministerio (y/o corredor hospitalario).</div></li>
+            <li class="li"><span class="dot"></span><div><b>Mapear ejes críticos</b>Rutas de emergencia, puntos negros, congestión.</div></li>
+            <li class="li"><span class="dot warn"></span><div><b>Simular antes de intervenir</b>Primero evidencia en “digital twin”.</div></li>
+            <li class="li"><span class="dot"></span><div><b>Entregar reporte decisional</b>Impacto, costos, requisitos, marco legal/operativo.</div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="callout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M7 11h10M7 15h7" stroke="rgba(255,255,255,.85)" stroke-width="1.6" stroke-linecap="round"/>
+              <path d="M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+            </svg>
+            <div>
+              <b>Entregables (90 días)</b>
+              <p>1) Dashboard · 2) Predicción · 3) Simulación de optimizaciones · 4) Propuesta de piloto de prioridad de emergencias.</p>
+              <div class="sep"></div>
+              <div class="small">Opción: 1 corredor a 1–2 hospitales para impacto rápido.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="seguridad">
+      <div class="section-title">
+        <h2>Seguridad, control y cumplimiento</h2>
+        <span>Tranquiliza (parte del acuerdo)</span>
+      </div>
+      <div class="panel cols">
+        <div>
+          <ul class="list">
+            <li class="li"><span class="dot"></span><div><b>Supervisión humana</b>Decisión final en autoridad (inicio: recomendación).</div></li>
+            <li class="li"><span class="dot"></span><div><b>Trazabilidad y auditoría</b>Logs, versionado, timestamps, historial.</div></li>
+            <li class="li"><span class="dot warn"></span><div><b>Fail-safe</b>Retorno a plan estándar / aislamiento del módulo piloto.</div></li>
+            <li class="li"><span class="dot"></span><div><b>Ciberseguridad</b>Arquitectura aislada, cifrado, control de accesos y pruebas.</div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="mini" style="height:100%">
+            <h3>Marco de responsabilidad (propuesta)</h3>
+            <p>El despliegue inicia sin intervención directa: <b>datos + simulación</b>. Cualquier acción real se limita a un <b>piloto</b> con validación, supervisión y procedimientos.</p>
+            <div class="sep"></div>
+            <p class="small">Objetivo: minimizar riesgo institucional y producir evidencia verificable.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="kpi">
+      <div class="section-title">
+        <h2>Indicadores de éxito (KPI)</h2>
+        <span>Medir antes de escalar</span>
+      </div>
+      <div class="panel">
+        <div class="kpis">
+          <div class="kpi"><div class="n">-X%</div><div class="l">Tiempo de respuesta emergencias (corredor piloto)</div></div>
+          <div class="kpi"><div class="n">+X%</div><div class="l">Velocidad promedio en ejes críticos</div></div>
+          <div class="kpi"><div class="n">-X%</div><div class="l">Tiempo perdido por congestión (distrito)</div></div>
+          <div class="kpi"><div class="n">≥ 95%</div><div class="l">Disponibilidad y calidad de datos</div></div>
+        </div>
+        <div class="sep"></div>
+        <div class="small">*Los “X” se fijan tras baseline (semana 1–2) con datos reales.</div>
+      </div>
+    </section>
+
+    <section id="solicitud">
+      <div class="section-title">
+        <h2>Solicitud al Ministerio</h2>
+        <span>Qué necesitamos para iniciar</span>
+      </div>
+      <div class="panel cols">
+        <div>
+          <div class="callout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3l9 6-9 6-9-6 9-6Z" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+              <path d="M3 13l9 6 9-6" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>
+            </svg>
+            <div>
+              <b>Decisión esperada</b>
+              <p>
+                1) Designar un <b>punto focal técnico</b> · 2) Definir un <b>distrito piloto</b> ·
+                3) Validar fase de <b>90 días</b> (datos + simulación) · 4) Acordar condiciones de un piloto
+                de <b>prioridad de emergencias</b> (si es viable).
+              </p>
+            </div>
+          </div>
+
+          <div class="sep"></div>
+
+          <div class="mini">
+            <h3>Preguntas para validar juntos</h3>
+            <p class="small">
+              • ¿Existe un centro de control de tráfico? <br/>
+              • Estado de semáforos: ¿conectados o analógicos? ¿Proveedor? <br/>
+              • ¿Corredores hospitalarios prioritarios? <br/>
+              • Restricciones legales y operativas.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="mini">
+            <h3>Nota interna (tono)</h3>
+            <p class="small">
+              Mensaje clave: <b>asistencia + piloto supervisado</b>. <br/>
+              Evitar: “control autónomo” en la primera reunión. <br/>
+              Pedir: punto focal técnico + acceso a info de infraestructura semafórica.
+            </p>
+            <div class="sep"></div>
+            <div class="hero-cta" style="margin-top:10px">
+              <a class="btn primary" href="#" onclick="window.print(); return false;">Imprimir / PDF</a>
+              <a class="btn" href="#enfoque">Volver al enfoque</a>
+            </div>
+          </div>
+
+          <div class="mini" style="margin-top:12px">
+            <h3>Checklist (mañana)</h3>
+            <p class="small">
+              ✅ Proponer 1 distrito (aunque sea tentativo) <br/>
+              ✅ Opcional: 1 corredor a 1–2 hospitales <br/>
+              ✅ Objetivo: “emergencias primero” <br/>
+              ✅ Salida deseada: punto focal + acuerdo 90 días
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <span>© <span id="y"></span> · Urban Flow (uso interno) · Datos → Simulación → Piloto supervisado</span>
+        <span class="pill"><b>Tip</b>: pantalla completa + PDF</span>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href');
+        if(!id || id==="#") return;
+        const el = document.querySelector(id);
+        if(!el) return;
+        e.preventDefault();
+        el.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+  </script>
+</body>
+</html>
