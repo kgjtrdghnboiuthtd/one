@@ -1,0 +1,920 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Urban Flow — Plan Institucional (MTC Lima)</title>
+  <meta name="description" content="Plan institucional Urban Flow para Lima: datos (Waze for Cities + Google Maps), optimización de tráfico, hoja de ruta hacia semáforos supervisados, prioridad a emergencias, KPIs y gobernanza." />
+  <style>
+    :root{
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.72);
+      --line:rgba(255,255,255,.14);
+      --shadow: 0 22px 70px rgba(0,0,0,.45);
+      --radius: 18px;
+      --accent:#67e8f9;
+      --accent2:#a78bfa;
+      --ok:#34d399;
+      --warn:#fbbf24;
+      --bad:#fb7185;
+      --bg0:#070a14;
+      --bg1:#0b1020;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 10%, rgba(103,232,249,.16), transparent 55%),
+        radial-gradient(900px 600px at 85% 30%, rgba(167,139,250,.16), transparent 55%),
+        linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 45%, var(--bg0) 100%);
+      overflow-x:hidden;
+    }
+    a{color:inherit}
+    .nav{
+      position:sticky;top:0;z-index:50;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(7,10,20,.82), rgba(7,10,20,.46));
+      border-bottom:1px solid var(--line);
+    }
+    .nav-inner{
+      max-width:1320px;margin:0 auto;
+      padding:10px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{
+      width:34px;height:34px;border-radius:12px;
+      background: linear-gradient(135deg, rgba(103,232,249,.95), rgba(167,139,250,.95));
+      box-shadow: 0 12px 26px rgba(103,232,249,.14);
+      position:relative;overflow:hidden;
+    }
+    .logo:after{
+      content:"";position:absolute;inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 45%);
+      transform: rotate(12deg);
+      animation: drift 8s ease-in-out infinite;
+      opacity:.55;
+    }
+    @keyframes drift{
+      0%,100%{transform:translate(0,0) rotate(12deg)}
+      50%{transform:translate(14px,-10px) rotate(12deg)}
+    }
+    .brand h1{margin:0;font-size:13px;letter-spacing:.25px;color:var(--muted);font-weight:780}
+    .nav-links{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+    .nav-links a{
+      text-decoration:none;
+      padding:8px 10px;border-radius:999px;
+      border:1px solid transparent;
+      color:var(--muted);
+      transition:.18s ease;
+      font-size:12px;
+    }
+    .nav-links a:hover{border-color:var(--line);color:var(--text);background:rgba(255,255,255,.04)}
+
+    .wrap{max-width:1320px;margin:0 auto;padding:16px 16px 70px}
+
+    .panel{
+      border:1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
+      position:relative;
+      overflow:hidden;
+    }
+    .panel:before{
+      content:"";position:absolute;inset:-1px;
+      background: radial-gradient(800px 220px at 20% 0%, rgba(103,232,249,.14), transparent 55%),
+                  radial-gradient(800px 220px at 80% 0%, rgba(167,139,250,.12), transparent 55%);
+      pointer-events:none;
+      opacity:.90;
+    }
+    .panel > *{position:relative}
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap:14px;
+      align-items:stretch;
+    }
+    @media(max-width:1020px){.hero{grid-template-columns:1fr}}
+    .hero h2{margin:0;font-size:18px;letter-spacing:-.3px}
+    .hero p{margin:10px 0 0;color:var(--muted);line-height:1.55;font-size:12.8px}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:12px;
+      white-space:nowrap;
+    }
+    .dot{width:9px;height:9px;border-radius:50%}
+    .dot.ok{background:var(--ok)}
+    .dot.warn{background:var(--warn)}
+    .dot.bad{background:var(--bad)}
+    .sep{height:1px;background:var(--line);margin:12px 0}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;
+      padding:10px 12px;border-radius:14px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.04);
+      color:var(--text);
+      text-decoration:none;
+      font-weight:860;
+      font-size:12.5px;
+      transition:.18s ease;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
+    .btn.primary{
+      border-color:transparent;
+      background: linear-gradient(135deg, rgba(103,232,249,.95), rgba(167,139,250,.95));
+      color:#071022;
+    }
+    .grid{
+      margin-top:14px;
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap:12px;
+    }
+    .card{
+      grid-column:span 4;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius: 20px;
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+      min-height: 120px;
+    }
+    @media(max-width:1020px){.card{grid-column:span 6}}
+    @media(max-width:560px){.card{grid-column:span 12}}
+    .card .top{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px
+    }
+    .card .title{font-weight:950;letter-spacing:-.2px}
+    .card .desc{color:var(--muted);font-size:12.3px;line-height:1.55;margin-top:8px}
+    .badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .badge{
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+    .section-title{
+      display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+      margin:0 0 10px;
+    }
+    .section-title h3{margin:0;font-size:15px;letter-spacing:-.2px}
+    .section-title span{color:var(--muted);font-size:12.2px}
+
+    /* Timeline plan */
+    .phases{
+      display:grid;
+      grid-template-columns: repeat(12,1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+    .phase{
+      grid-column: span 6;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius: 20px;
+      padding:14px;
+      min-height: 160px;
+    }
+    @media(max-width:1020px){.phase{grid-column:span 12}}
+    .phase .head{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:10px
+    }
+    .phase .name{font-weight:950;letter-spacing:-.2px}
+    .phase .time{color:var(--muted);font-size:12.2px}
+    .phase ul{margin:10px 0 0 18px;color:var(--muted);font-size:12.4px;line-height:1.55}
+    .phase li{margin:6px 0}
+    .kpi-grid{
+      display:grid;
+      grid-template-columns: repeat(12,1fr);
+      gap:12px;
+      margin-top:12px;
+    }
+    .kpi{
+      grid-column: span 3;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.03);
+      border-radius: 20px;
+      padding:14px;
+      min-height: 104px;
+    }
+    @media(max-width:1020px){.kpi{grid-column:span 6}}
+    @media(max-width:560px){.kpi{grid-column:span 12}}
+    .kpi .l{color:var(--muted);font-size:12.2px}
+    .kpi .v{margin-top:8px;font-size:16px;font-weight:950}
+    .kpi .s{margin-top:8px;color:var(--muted);font-size:12.2px;line-height:1.45}
+
+    /* Table */
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0 8px;
+      margin-top:10px;
+      font-size:12.2px;
+    }
+    th{color:var(--muted);font-weight:850;text-align:left;padding:0 6px}
+    td{
+      padding:10px 10px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.10);
+      color:rgba(255,255,255,.86);
+    }
+    tr td:first-child{border-radius:12px 0 0 12px}
+    tr td:last-child{border-radius:0 12px 12px 0}
+    .footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:12.2px;
+      display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;
+      border-top:1px solid var(--line);
+      padding-top:14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>Urban Flow · Plan Institucional — Lima (MTC)</h1>
+      </div>
+      <div class="nav-links">
+        <a href="#objetivo">Objetivo</a>
+        <a href="#datos">Datos</a>
+        <a href="#fases">Fases</a>
+        <a href="#kpis">KPIs</a>
+        <a href="#gobernanza">Gobernanza</a>
+        <a href="#benchmark">Ciudades</a>
+        <a href="#next">Siguientes pasos</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+
+    <!-- HERO -->
+    <div class="panel" id="objetivo">
+      <div class="hero">
+        <div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <span class="pill"><span class="dot ok"></span>Institucional</span>
+            <span class="pill"><span class="dot warn"></span>Asistencia a decisión</span>
+            <span class="pill"><span class="dot ok"></span>Auditable</span>
+            <span class="pill"><span class="dot bad"></span>Sin “autonomía total” día 1</span>
+          </div>
+
+          <h2>Optimización del tráfico en Lima con datos (Waze + Google) y hoja de ruta hacia semáforos supervisados</h2>
+          <p>
+            Urban Flow propone un despliegue progresivo: <b>datos → análisis → recomendaciones → piloto controlado</b>.
+            En una primera etapa, optimizamos el tránsito sin tocar la infraestructura. En etapas posteriores, habilitamos
+            <b>prioridad de emergencias</b> y <b>ajustes semafóricos supervisados</b>, con trazabilidad y gobernanza.
+          </p>
+
+          <div class="sep"></div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a class="btn primary" href="#next">📄 Plan de piloto (listo para MPV)</a>
+            <a class="btn" href="#datos">🗺️ Fuentes de datos</a>
+            <a class="btn" href="#gobernanza">🛡️ Gobernanza / Riesgos</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">
+            <h3>Resumen ejecutivo (30 segundos)</h3>
+            <span class="mono">v1.0 · interno</span>
+          </div>
+
+          <div class="card" style="grid-column:span 12; min-height:unset">
+            <div class="top">
+              <div class="title">Qué entregamos</div>
+              <span class="badge"><span class="dot ok"></span>12 semanas</span>
+            </div>
+            <div class="desc">
+              1) Panel operacional (congestión + incidentes + histórico) · 2) Recomendaciones operativas (desvíos / gestión)
+              · 3) KPIs medibles “antes/después” · 4) Hoja de ruta semafórica con humano-en-el-bucle y auditoría.
+            </div>
+            <div class="badges">
+              <span class="badge">Waze for Cities</span>
+              <span class="badge">Google Maps (proveedor data)</span>
+              <span class="badge">OSM (base cartográfica)</span>
+              <span class="badge">Emergencias (prioridad)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PILARES -->
+    <div class="panel" style="margin-top:14px">
+      <div class="section-title">
+        <h3>Pilares del proyecto</h3>
+        <span>enfoque realista para un primer piloto</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="top">
+            <div class="title">1) Datos oficiales / asociados</div>
+            <span class="badge"><span class="dot ok"></span>Base</span>
+          </div>
+          <div class="desc">
+            Unificamos datos de <b>Waze for Cities</b> (incidentes/cierres) + <b>Google Maps</b> (tráfico/tiempos de viaje),
+            con mapas OSM como soporte visual. Cámara = solo “plan C”.
+          </div>
+          <div class="badges">
+            <span class="badge">Incidentes</span>
+            <span class="badge">Congestión</span>
+            <span class="badge">Histórico</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">2) Asistencia a decisión (no promesas)</div>
+            <span class="badge"><span class="dot warn"></span>Seguridad</span>
+          </div>
+          <div class="desc">
+            La IA produce <b>recomendaciones</b> y <b>simulaciones</b> con justificación KPI. Operación humana aprueba acciones,
+            dejando huella en auditoría (quién/qué/cuándo).
+          </div>
+          <div class="badges">
+            <span class="badge">Audit trail</span>
+            <span class="badge">Riesgo controlado</span>
+            <span class="badge">Transparencia</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">3) Ruta hacia semáforos & emergencias</div>
+            <span class="badge"><span class="dot ok"></span>Escalable</span>
+          </div>
+          <div class="desc">
+            Se respeta lo existente (adaptativo actual) y se añade una capa para <b>prioridad de emergencias</b> y,
+            si se autoriza, micro-ajustes semafóricos supervisados en intersecciones piloto.
+          </div>
+          <div class="badges">
+            <span class="badge">Onda verde</span>
+            <span class="badge">Ambulancias</span>
+            <span class="badge">Policía</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATOS -->
+    <div class="panel" id="datos" style="margin-top:14px">
+      <div class="section-title">
+        <h3>Fuentes de datos (A/B/C)</h3>
+        <span>prioridad: A + B · C solo en caso extremo</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="top">
+            <div class="title">Opción A — Waze for Cities (Gobierno)</div>
+            <span class="badge"><span class="dot ok"></span>Preferida</span>
+          </div>
+          <div class="desc">
+            Incidentes, cierres, eventos reportados por comunidad y validados por dinámica Waze. Ideal para operación diaria,
+            coordinación con autoridades y comunicación al ciudadano.
+          </div>
+          <div class="badges">
+            <span class="badge">Incidentes</span>
+            <span class="badge">Cierres</span>
+            <span class="badge">Eventos</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">Opción B — Proveedor de tráfico (Google Maps)</div>
+            <span class="badge"><span class="dot ok"></span>Complemento</span>
+          </div>
+          <div class="desc">
+            Datos de congestión/velocidades/tiempos de viaje (según producto contratado). Útil para KPIs, trazas históricas,
+            comparación “antes/después” y predicción.
+          </div>
+          <div class="badges">
+            <span class="badge">Tiempo de viaje</span>
+            <span class="badge">Velocidad</span>
+            <span class="badge">Histórico</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">Opción C — Cámaras / visión (solo si es necesario)</div>
+            <span class="badge"><span class="dot bad"></span>Plan C</span>
+          </div>
+          <div class="desc">
+            Solo si se necesita precisión local (colas por carril, conteo, detección bus/ambulancia). Aumenta CAPEX/OPEX,
+            permisos, mantenimiento y riesgo operativo. No es requisito para el piloto.
+          </div>
+          <div class="badges">
+            <span class="badge">Intersecciones críticas</span>
+            <span class="badge">Coste ↑</span>
+            <span class="badge">Permisos</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="section-title">
+        <h3>Arquitectura (alto nivel)</h3>
+        <span>simple, gobernable, escalable</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:180px">Bloque</th>
+            <th style="min-width:240px">Entrada</th>
+            <th>Salida / valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ingesta & normalización</td>
+            <td>Waze (incidentes) + Google (tráfico) + OSM (mapa)</td>
+            <td>Modelo de datos único por corredor/intersección (tiempo real + histórico)</td>
+          </tr>
+          <tr>
+            <td>Motor KPI</td>
+            <td>Tiempos de viaje, incidentes, patrones por hora/día</td>
+            <td>KPIs auditables: congestión, fluidez, respuesta emergencias, resiliencia</td>
+          </tr>
+          <tr>
+            <td>Asistente IA (supervisado)</td>
+            <td>KPI + reglas + restricciones operativas</td>
+            <td>Recomendaciones justificadas + nivel de riesgo + necesidad de aprobación</td>
+          </tr>
+          <tr>
+            <td>Auditoría / trazabilidad</td>
+            <td>Eventos (tick, acción, operador)</td>
+            <td>Registro completo: qué cambió, por qué, quién aprobó, cuándo</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- FASES -->
+    <div class="panel" id="fases" style="margin-top:14px">
+      <div class="section-title">
+        <h3>Plan realista de implementación (piloto → escala)</h3>
+        <span>enfoque “primero resultados, luego control semafórico”</span>
+      </div>
+
+      <div class="phases">
+        <div class="phase">
+          <div class="head">
+            <div>
+              <div class="name">Fase 0 — Alineamiento institucional</div>
+              <div class="time">2–4 semanas</div>
+            </div>
+            <span class="pill"><span class="dot ok"></span>Fundación</span>
+          </div>
+          <ul>
+            <li>Definir <b>perímetro piloto</b> (1–2 corredores + 10–20 intersecciones).</li>
+            <li>Confirmar <b>fuentes de datos</b> (Waze + proveedor tráfico Google).</li>
+            <li>Acuerdo sobre <b>KPIs</b> y forma de medición “antes/después”.</li>
+            <li>Gobernanza: roles, responsables, acceso, retención de datos.</li>
+          </ul>
+        </div>
+
+        <div class="phase">
+          <div class="head">
+            <div>
+              <div class="name">Fase 1 — Optimización sin tocar infraestructura</div>
+              <div class="time">6–12 semanas</div>
+            </div>
+            <span class="pill"><span class="dot warn"></span>Bajo riesgo</span>
+          </div>
+          <ul>
+            <li>Dashboard operacional: congestión, incidentes, replay histórico.</li>
+            <li>Recomendaciones: desvíos, planes de obra/eventos, priorización operativa.</li>
+            <li>Primer informe KPI: <b>línea base</b> y mejoras rápidas (quick wins).</li>
+            <li>Preparación de protocolos para emergencias (rutas & ventanas).</li>
+          </ul>
+        </div>
+
+        <div class="phase">
+          <div class="head">
+            <div>
+              <div class="name">Fase 2 — Emergencias + micro-ajustes supervisados</div>
+              <div class="time">3–6 meses</div>
+            </div>
+            <span class="pill"><span class="dot ok"></span>Controlado</span>
+          </div>
+          <ul>
+            <li>Prioridad emergencias: <b>corredores hospitalarios</b> (aprobación humana).</li>
+            <li>Integración con semáforos adaptativos existentes (sin “reemplazar”).</li>
+            <li>Micro-ajustes en ventanas acotadas (horas específicas / escenarios).</li>
+            <li>Auditoría reforzada: responsabilidad, reversión, post-mortem.</li>
+          </ul>
+        </div>
+
+        <div class="phase">
+          <div class="head">
+            <div>
+              <div class="name">Fase 3 — Escalamiento a red urbana</div>
+              <div class="time">6–18 meses</div>
+            </div>
+            <span class="pill"><span class="dot ok"></span>Escala</span>
+          </div>
+          <ul>
+            <li>Extender a más corredores/distritos según resultados del piloto.</li>
+            <li>Mejora del modelo predictivo con datos históricos.</li>
+            <li>Operación 24/7 (según decisión institucional) y SLA.</li>
+            <li>Plan de continuidad operativa y ciberseguridad (hardening).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="panel" id="kpis" style="margin-top:14px">
+      <div class="section-title">
+        <h3>KPIs propuestos (medibles y defendibles)</h3>
+        <span>“antes/después” · por corredor · por hora</span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi">
+          <div class="l">Tiempo de viaje (corredores)</div>
+          <div class="v">minutos / percentiles</div>
+          <div class="s">P50/P90 por franja horaria. Medida base para demostrar mejora real.</div>
+        </div>
+        <div class="kpi">
+          <div class="l">Velocidad promedio</div>
+          <div class="v">km/h</div>
+          <div class="s">Por tramo. Útil para “mapa de congestión” y tendencias semanales.</div>
+        </div>
+        <div class="kpi">
+          <div class="l">Incidentes / cierres</div>
+          <div class="v"># / severidad</div>
+          <div class="s">Conteo y duración. Enlace directo con operación (respuesta, desvíos).</div>
+        </div>
+        <div class="kpi">
+          <div class="l">Emergencias</div>
+          <div class="v">ETA a hospital</div>
+          <div class="s">Tiempo de llegada estimado antes/después de protocolos de prioridad.</div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="section-title">
+        <h3>Resultados esperables (sin prometer)</h3>
+        <span>con enfoque incremental</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:220px">Área</th>
+            <th style="min-width:220px">Qué medimos</th>
+            <th>Cómo lo comunicamos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Operación diaria</td>
+            <td>Incidentes + tiempos de viaje por corredor</td>
+            <td>“Reducción de variabilidad / mejora de fluidez en horas punta”</td>
+          </tr>
+          <tr>
+            <td>Eventos / obras</td>
+            <td>Impacto antes/durante/después</td>
+            <td>“Plan de desvío + KPI de mitigación”</td>
+          </tr>
+          <tr>
+            <td>Emergencias</td>
+            <td>ETA a hospitales y rutas prioritarias</td>
+            <td>“Mejor coordinación y tiempos de respuesta”</td>
+          </tr>
+          <tr>
+            <td>Semáforos (si se habilita)</td>
+            <td>Colas, esperas, coordinación</td>
+            <td>“Micro-ajustes supervisados, reversibles y auditables”</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- GOBERNANZA -->
+    <div class="panel" id="gobernanza" style="margin-top:14px">
+      <div class="section-title">
+        <h3>Gobernanza, seguridad y responsabilidad</h3>
+        <span>lo que tranquiliza a un Ministerio</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="top">
+            <div class="title">Humano en el bucle</div>
+            <span class="badge"><span class="dot ok"></span>Clave</span>
+          </div>
+          <div class="desc">
+            La IA propone; el operador aprueba. Cambios (si aplica) se ejecutan con límites y reversión.
+            Esto reduce riesgo legal y operativo.
+          </div>
+          <div class="badges">
+            <span class="badge">Aprobación</span>
+            <span class="badge">Reversión</span>
+            <span class="badge">Umbrales</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">Auditoría completa</div>
+            <span class="badge"><span class="dot warn"></span>Transparencia</span>
+          </div>
+          <div class="desc">
+            Registro de: datos recibidos, KPI calculado, recomendación, decisión humana, acción aplicada y resultados.
+            Ideal para reportes y revisión.
+          </div>
+          <div class="badges">
+            <span class="badge">Log</span>
+            <span class="badge">Trazabilidad</span>
+            <span class="badge">Reporte</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">Seguridad (alto nivel)</div>
+            <span class="badge"><span class="dot bad"></span>Control</span>
+          </div>
+          <div class="desc">
+            Segmentación de red, mínimo privilegio, llaves/credenciales rotativas, monitoreo y aislamiento ante anomalías.
+            En semáforos: aislamiento por diseño y fallback.
+          </div>
+          <div class="badges">
+            <span class="badge">Segmentación</span>
+            <span class="badge">Zero-trust</span>
+            <span class="badge">Fallback</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="section-title">
+        <h3>Riesgos & mitigación (piloto)</h3>
+        <span>listo para anexos</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:220px">Riesgo</th>
+            <th style="min-width:260px">Ejemplo</th>
+            <th>Mitigación</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Calidad/latencia de datos</td>
+            <td>Huecos, retrasos, cambios de formato</td>
+            <td>Validación, fuentes redundantes (A+B), degradación elegante</td>
+          </tr>
+          <tr>
+            <td>Decisiones operativas</td>
+            <td>Recomendación que podría desviar congestión</td>
+            <td>Humano en el bucle, límites por corredor, pruebas A/B</td>
+          </tr>
+          <tr>
+            <td>Seguridad</td>
+            <td>Acceso indebido al panel</td>
+            <td>MFA, roles, segmentación, logs, hardening</td>
+          </tr>
+          <tr>
+            <td>Semáforos (si se habilita)</td>
+            <td>Cambio de fases incorrecto</td>
+            <td>Micro-ajustes, ventanas acotadas, fallback, simulación previa</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- BENCHMARK / CIUDADES -->
+    <div class="panel" id="benchmark" style="margin-top:14px">
+      <div class="section-title">
+        <h3>Referencias internacionales (para contexto)</h3>
+        <span>ciudades que optimizan señales / gestión activa</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="top">
+            <div class="title">Londres</div>
+            <span class="badge"><span class="dot ok"></span>Señales adaptativas</span>
+          </div>
+          <div class="desc">
+            Ejemplo clásico de red urbana con control adaptativo y operación centralizada.
+            Útil como benchmark de “optimización incremental”.
+          </div>
+          <div class="badges">
+            <span class="badge">Adaptativo</span>
+            <span class="badge">Centro de control</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">Nueva York</div>
+            <span class="badge"><span class="dot warn"></span>Gestión activa</span>
+          </div>
+          <div class="desc">
+            Uso de sensores/cámaras y operación para mejorar fluidez en zonas críticas. Referencia de coordinación operacional.
+          </div>
+          <div class="badges">
+            <span class="badge">Operación</span>
+            <span class="badge">Zonas críticas</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">París</div>
+            <span class="badge"><span class="dot warn"></span>Benchmark</span>
+          </div>
+          <div class="desc">
+            Red densa y compleja, con gestión urbana y coordinación por ejes. Útil para presentar retos similares de metrópolis.
+          </div>
+          <div class="badges">
+            <span class="badge">Densidad</span>
+            <span class="badge">Intersecciones</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+
+      <p style="margin:0;color:var(--muted);font-size:12.6px;line-height:1.6">
+        Urban Flow no pretende “inventar” cifras en esta presentación: proponemos <b>medir KPIs locales</b> con datos reales
+        (Waze + proveedor tráfico) y reportar resultados verificables del piloto.
+      </p>
+    </div>
+
+    <!-- NEXT STEPS -->
+    <div class="panel" id="next" style="margin-top:14px">
+      <div class="section-title">
+        <h3>Siguientes pasos (para MPV / carta)</h3>
+        <span>rápido, claro, ejecutable</span>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <div class="top">
+            <div class="title">1) Confirmar piloto</div>
+            <span class="badge"><span class="dot ok"></span>Semana 1</span>
+          </div>
+          <div class="desc">
+            Definir: distrito/corredores, contactos técnicos, KPIs finales, y formato de reportes mensuales.
+          </div>
+          <div class="badges">
+            <span class="badge">Perímetro</span>
+            <span class="badge">KPIs</span>
+            <span class="badge">Reporte</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">2) Acceso a datos (A + B)</div>
+            <span class="badge"><span class="dot warn"></span>Semana 2–3</span>
+          </div>
+          <div class="desc">
+            Validar Waze for Cities (canal institucional) + acuerdo/consumo de datos de tráfico (Google u otro).
+          </div>
+          <div class="badges">
+            <span class="badge">Waze</span>
+            <span class="badge">Google</span>
+            <span class="badge">Normalización</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="top">
+            <div class="title">3) Entregar dashboard + baseline</div>
+            <span class="badge"><span class="dot ok"></span>Semana 4–8</span>
+          </div>
+          <div class="desc">
+            Panel operacional listo + baseline KPI + primeras recomendaciones y procedimientos operativos.
+          </div>
+          <div class="badges">
+            <span class="badge">Dashboard</span>
+            <span class="badge">Baseline</span>
+            <span class="badge">Procedimientos</span>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column:span 12; min-height:unset">
+          <div class="top">
+            <div class="title">Checklist anexos (para la “carta presentando su solución”)</div>
+            <span class="badge"><span class="dot ok"></span>Listo</span>
+          </div>
+          <div class="desc">
+            <b>A1.</b> Resumen ejecutivo (1–2 páginas) ·
+            <b>A2.</b> Plan piloto (alcance, cronograma, KPIs, roles) ·
+            <b>A3.</b> Arquitectura alto nivel (A/B/C + auditoría) ·
+            <b>A4.</b> Riesgos & mitigación ·
+            <b>A5.</b> Demo (HTML) y capturas.
+          </div>
+          <div class="badges">
+            <span class="badge">MPV</span>
+            <span class="badge">PDF</span>
+            <span class="badge">Anexos</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sep"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn primary" id="btnPrint" type="button">🖨️ Exportar / Imprimir (PDF)</button>
+        <button class="btn" id="btnExpand" type="button">✨ Modo “presentación”</button>
+        <span class="pill"><span class="dot ok"></span>Recomendación: exportar en PDF para MPV</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span>© <span id="y"></span> · Urban Flow (uso interno) · Plan institucional</span>
+      <span class="pill"><span class="dot ok"></span>Datos: Waze + Google · Cámaras: plan C</span>
+    </div>
+
+  </div>
+
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+
+    // Print to PDF
+    document.getElementById("btnPrint").addEventListener("click", ()=> window.print());
+
+    // Presentation mode: hides nav + increases spacing slightly
+    let presentation = false;
+    document.getElementById("btnExpand").addEventListener("click", ()=>{
+      presentation = !presentation;
+      const nav = document.querySelector(".nav");
+      const wrap = document.querySelector(".wrap");
+      if(presentation){
+        nav.style.display = "none";
+        wrap.style.paddingTop = "18px";
+        document.getElementById("btnExpand").textContent = "↩ Salir de presentación";
+      }else{
+        nav.style.display = "";
+        wrap.style.paddingTop = "";
+        document.getElementById("btnExpand").textContent = "✨ Modo “presentación”";
+      }
+    });
+  </script>
+
+  <style>
+    /* Print styles */
+    @media print{
+      .nav, #btnPrint, #btnExpand{display:none !important;}
+      body{
+        background:#fff !important;
+        color:#111 !important;
+      }
+      .panel{
+        box-shadow:none !important;
+        background:#fff !important;
+        border:1px solid #ddd !important;
+      }
+      .panel:before{display:none !important;}
+      .badge,.pill{
+        border:1px solid #ddd !important;
+        background:#fff !important;
+        color:#333 !important;
+      }
+      .card,.phase,.kpi, td{
+        border:1px solid #ddd !important;
+        background:#fff !important;
+      }
+      .card .desc,.phase ul,.kpi .s, p, th{color:#333 !important;}
+      a{color:#111 !important;text-decoration:none !important;}
+    }
+  </style>
+</body>
+</html>
